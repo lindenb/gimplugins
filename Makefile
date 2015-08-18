@@ -1,6 +1,4 @@
-.PHONY:all clean
+.PHONY:all clean install
 export GIMPTOOL:= gimptool-2.0
-all:
-	$(MAKE) -C src/hello all
-clean:
-	$(MAKE) -C src/hello clean
+all clean install:
+	$(MAKE) -C src/hello $@

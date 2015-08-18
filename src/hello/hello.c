@@ -13,6 +13,8 @@ static void      run    (gchar     *name,
 
 static void      stripes_demo         (GimpDrawable *drawable);
 
+// Null Null corresponds to the two of the gimptool function that is option
+// which are init and close which are for the beginning and ending of the gimp-plug-in
 GimpPlugInInfo PLUG_IN_INFO =
 {
   (GimpInitProc)NULL,  /* init_proc  */
@@ -24,9 +26,10 @@ GimpPlugInInfo PLUG_IN_INFO =
 
 MAIN ()
 
-static void
-query (void)
+// query function called each time the plug-in changes
+static void query (void)
 {
+// contains three things - the parameter type, its name, and a string describing the parameter
   static GimpParamDef args[] =
   {
     { GIMP_PDB_INT32, "run_mode", "Interactive, non-interactive" },
@@ -35,6 +38,12 @@ query (void)
   };
   static gint nargs = sizeof (args) / sizeof (args[0]);
 
+/*
+ the install procedure would have the procedure name
+ a description of what it is, the location of the plug-in,
+ the type of images the plug-in would handle
+ the input and output parameters of the plug-in.
+*/
   gimp_install_procedure ("plug_in_stripes_demo",
 			  "Demonstration plugin - creates stripes",
 			  "This simple plug-in creates diagonal stripes.",
@@ -48,8 +57,10 @@ query (void)
 			  args, NULL);
 }
 
-static void
-run (gchar   *name,
+// run plug-in is the heart of the plug-in program
+// the parameters are name, inputparameters and a pointer to output parameters.
+static void run (
+     gchar   *name,
      gint     nparams,
      GimpParam  *param,
      gint    *nreturn_vals,
