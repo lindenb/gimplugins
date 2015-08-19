@@ -1,12 +1,12 @@
 .PHONY:all clean install
+SRCNAME=hello
+all:${SRCNAME}
 
-all:hello
-
-install: hello
+install: ${SRCNAME}
 	$(GIMPTOOL) --install-bin $<
 
-hello: hello.c
+${SRCNAME}: $(addsuffix .c,${SRCNAME})
 	$(GIMPTOOL) --build $<
 
 clean:
-	rm -f hello 
+	rm -f ${SRCNAME} 
