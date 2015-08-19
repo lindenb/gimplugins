@@ -238,8 +238,9 @@ void MyPlugin::run(XDrawable drawable)
 char *ob=gimp_context_get_brush();
 gimp_context_set_brush_size(1);
 char* b = ::gimp_brush_duplicate(ob);
+gimp_brush_set_radius (b,1);
 gimp_context_set_brush(b);
-gimp_context_set_brush_size(1);
+//gimp_context_set_brush_size(1);
 
   gimp_image_undo_group_start(drawable.image());
   for(int k=0;k<100;++k)
