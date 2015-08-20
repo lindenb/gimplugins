@@ -232,23 +232,43 @@ MyPlugin::~MyPlugin()
 void MyPlugin::run(XDrawable drawable)
 {
   guchar *dest, *d;
-  XBound bounds = drawable.mask_bounds();
+  XBound<gint> bounds = drawable.mask_bounds();
   gint    x, y;
   gpointer pr;
 char *ob=gimp_context_get_brush();
+if(ob==NULL) return;
 gimp_context_set_brush_size(1);
 char* b = ::gimp_brush_duplicate(ob);
+if(b==NULL) return;
 gimp_brush_set_radius (b,1);
 gimp_context_set_brush(b);
 //gimp_context_set_brush_size(1);
 
   gimp_image_undo_group_start(drawable.image());
-  for(int k=0;k<100;++k)
+  for(int k=0;k<1000;++k)
   	{
-  	double x3 = random.rnd()*bounds.width() + bounds.x1;
-  	double y3 = random.rnd()*bounds.height() + bounds.y1;
-  	 gdouble  array2[4]={x3,y3,x3,y3};
-  	 gimp_paintbrush_default( drawable.id(),2,array2);
+  	gdouble x3 = random.rnd()*bounds.width() + bounds.x1;
+  	gdouble y3 = random.rnd()*bounds.height() + bounds.y1;
+  	std::vector<gdouble>  array2;
+	array2.push_back(x3);
+	array2.push_back(y3);
+
+	array2.push_back(x3);
+        array2.push_back(y3+10);
+
+	array2.push_back(x3+10);
+        array2.push_back(y3+10);
+
+	array2.push_back(x3+10);
+        array2.push_back(y3);
+
+	array2.push_back(x3);
+	array2.push_back(y3);
+
+  	 gimp_paintbrush_default( drawable.id(),(gint)array2.size()/2,array2.data());
+  	 
+  	 gdouble array3[6]={x3,y3,x3+20,y3+20,x3 y3};
+  	 gimp_paintbrush_default( drawable.id(),3,array3);
   	}
   gimp_image_undo_group_end(drawable.image());
 gimp_context_set_brush(ob);

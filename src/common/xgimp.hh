@@ -12,12 +12,25 @@
 #include <libgimp/gimpui.h>
 #include <libgimp/gimpcompat.h>
 
+template<typename T>
+struct XPoint
+	{
+	T x,y;
+	};
 
+template<typename T>
+struct XRect
+	{
+	T x,y,width,height;
+	};
+
+
+template<typename T>
 struct XBound
 	{
-	gint x1,y1,x2,y2;
-	gint width() const { return x2-x1;}
-	gint height() const { return y2-y1;}
+	T x1,y1,x2,y2;
+	T width() const { return x2-x1;}
+	T height() const { return y2-y1;}
 	};
 
 class XItem
@@ -108,9 +121,9 @@ class XDrawable:public XItem
 			{
 			return ::gimp_drawable_mask_bounds(id(),x1,y1,x2,y2);
 			}
-		XBound mask_bounds()
+		XBound<gint> mask_bounds()
 			{
-			XBound b;
+			XBound<gint> b;
 			if(!this->mask_bounds(&b.x1,&b.y1,&b.x2,&b.y2))
 				{
 				b.x1=0;
