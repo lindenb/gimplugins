@@ -12,6 +12,16 @@
 #include <libgimp/gimpui.h>
 #include <libgimp/gimpcompat.h>
 
+struct XColorRGB
+	{
+	gint r,g,b;
+	};
+	
+struct XColorRGBA: XColorRGB
+	{
+	gint a;
+	};
+
 template<typename T>
 struct XPoint
 	{
@@ -29,9 +39,21 @@ template<typename T>
 struct XBound
 	{
 	T x1,y1,x2,y2;
+	T x() const { return x1;}
+	T y() const { return y1;}
 	T width() const { return x2-x1;}
 	T height() const { return y2-y1;}
+	XRect<T> rect() const
+		{
+		XRect<T> r;
+		r.x=x();
+		r.y=y();
+		r.width = width();
+		r.height = height();
+		return r;
+		}
 	};
+
 
 class XItem
 	{
@@ -121,10 +143,14 @@ class XDrawable:public XItem
 			{
 			return ::gimp_drawable_mask_bounds(id(),x1,y1,x2,y2);
 			}
+		gboolean mask_bounds(XBound<gint>* b)
+			{
+			return this->mask_bounds(&(b->x1),&(b->y1),&(b->x2),&(b->y2));
+			}
 		XBound<gint> mask_bounds()
 			{
 			XBound<gint> b;
-			if(!this->mask_bounds(&b.x1,&b.y1,&b.x2,&b.y2))
+			if(!this->mask_bounds(&b))
 				{
 				b.x1=0;
 				b.y1=0;
@@ -138,8 +164,136 @@ class XDrawable:public XItem
 			{
 			return ::gimp_drawable_has_alpha(id());
 			}
+		gboolean  merge_shadow(gboolean undo)
+			{
+			return ::gimp_drawable_merge_shadow(id(),undo);
+			}
+		gboolean update(gint x,  gint y, gint width,  gint height)
+			{
+			return ::gimp_drawable_update(id(),x,y,width,height);
+                        }
+                gboolean update(XRect<gint> rect)
+			{
+			return update(rect.x,rect.y,rect.width,rect.height);
+                        }
+                 gboolean update()
+			{
+			return update(mask_bounds().rect());
+                        }
 	};
 
-
+class XTileIterator1
+	{
+	private:
+		GimpPixelRgn _src_rgn, _dest_rgn;
+		gpointer pr;
+  		bool has_alpha;
+	public:
+		XTileIterator1(XDrawable& drawable):pr(NULL)
+			{
+			XBound<gint> rect;
+			drawable.mask_bounds(&rect);
+			::gimp_pixel_rgn_init (
+				&_src_rgn,
+				drawable.drawable(),
+		       		rect.x(),
+		       		rect.y(),
+		       		rect.width(),
+		       		rect.height(),
+		       		FALSE,
+		       		FALSE
+		       		);
+		       	::gimp_pixel_rgn_init (
+				&_dest_rgn,
+				drawable.drawable(),
+		       		rect.x(),
+		       		rect.y(),
+		       		rect.width(),
+		       		rect.height(),
+		       		TRUE,
+		       		TRUE
+		       		);
+      			has_alpha = drawable.has_alpha();
+      			pr = ::gimp_pixel_rgns_register (2, &_src_rgn, &_dest_rgn);
+			}
+		~XTileIterator1()
+			{
+			}
+		
+		bool ok() const 
+			{ 
+			return pr!=NULL; 
+			}
+		operator bool() const 
+			{ 
+			return ok(); 
+			}
+		XTileIterator1& operator++()
+			{
+			if(pr!=NULL)
+				{
+				pr = ::gimp_pixel_rgns_process(pr);
+				}
+			return *this;
+			}
+		gint x() const { return _src_rgn.x;}
+		gint y() const { return _src_rgn.y;}
+		gint height() const { return _src_rgn.h;}
+		gint width() const { return _src_rgn.w;}
+	private:
+		guchar* _at(GimpPixelRgn* base,gint y,gint x)
+			{
+			if(pr==NULL) return NULL;
+			guchar* s= base->data;
+			s+= (base->rowstride)*y;
+			s+= (base->bpp)*x;
+			return s;
+			}	
+	public:
+		guchar* src_at(gint y,gint x)
+			{
+			return _at(&_src_rgn,y,x);
+			}
+		guchar* dest_at(gint y,gint x)
+			{
+			return _at(&_dest_rgn,y,x);
+			}
+			
+		bool contains(gint y,gint x)
+			{
+			/*boolean b= !(
+				y<0 ||
+				x<0 ||
+				x >= (this->x()+this->witdh()) ||
+				y >= (this->y()+this->height())
+				);
+			return b;*/
+			return true;
+			}
+		
+		void setPixel(gint y,gint x,guchar* pix)
+			{
+			if(!contains(y,x)) return;
+			guchar* d = dest_at(y,x);
+			d[0]=pix[0];
+			d[1]=pix[1];
+			d[2]=pix[2];
+			}
+		
+		struct Pixel
+			{
+			XTileIterator1* owner;
+			gint y,x;
+			};
+		
+		Pixel at(gint y,gint x)
+			{
+			Pixel p;
+			p.owner = this;
+			p.y = y;
+			p.x = x;
+			return p;
+			}
+	};
 
 #endif /* SRC_COMMON_XGIMP_HH_ */

@@ -4,6 +4,8 @@
 #include <climits>
 #include <cmath>
 #include "common/random.hh"
+
+
 /* Does a sketchy appearance influence drawing behavior 
 J Meyer, BB Bederson - hcil2.cs.umd.edu
 */
@@ -11,7 +13,6 @@ J Meyer, BB Bederson - hcil2.cs.umd.edu
 class Wiggle
 	{
 	private:
-		Random rand;
 		int B;//256
 		int BM;//255
 		int N;//4096
@@ -20,8 +21,10 @@ class Wiggle
 		double noiseAmp;
 		bool wiggly;
 	public:
-		
-		Wiggle():B(256),BM(255),N(0x1000),noiseAmp(.05),wiggly(true)
+		double factor;
+		int steps;
+		Random* rand;
+		Wiggle(Random* rand):B(256),BM(255),N(0x1000),noiseAmp(.05),wiggly(true),factor(0.01),steps(10),rand(rand)
 			{
 			int i=0, j, k;
 			p  = new int[B + B + 2];
@@ -29,11 +32,11 @@ class Wiggle
 	
 			for (i = 0 ; i < B ; i++) {
 				p[i] = i;
-				g1[i] = (double)((rand.nextInt(SHRT_MAX) % (B + B)) - B) / B;
+				g1[i] = (double)((rand->nextInt(SHRT_MAX) % (B + B)) - B) / B;
 				}
 			while (--i>=0) {
 				k = p[i];
-				p[i] = p[j = (rand.nextInt(SHRT_MAX) % B )];
+				p[i] = p[j = (rand->nextInt(SHRT_MAX) % B )];
 				p[j] = k;
 				}
 	
@@ -71,8 +74,10 @@ class Wiggle
 
 			   return (lerp(sx, u, v));
 			}
-		void drawWiggle(std::vector<double>& path,double p, float ax, float ay, float bx, float by)
+	public:
+		void drawWiggle(std::vector<double>& pts,float ax, float ay, float bx, float by)
 			{
+			double p=this->factor;
 			/** distance horizontal */
 			float width = bx - ax;
 			//distence vertical
@@ -92,18 +97,18 @@ class Wiggle
 		
 		
 				float x1 = ax, y1 = ay;
-				path.push_back(x1);
-				path.push_back(y1);
-				for (int i = 1; i < 10; i++)
+				pts.push_back(x1);
+				pts.push_back(y1);
+				for (int i = 1; i < this->steps; i++)
 					{
-					double t = i/10.0;
+					double t = i/((double)this->steps);
 				    double n = noise1(p);
 				    p += freq;
 			
 				    int x2 = (int)(lerp(t, ax, bx) + n * wx);
 					int y2 = (int)(lerp(t, ay, by) + n * wy);
 					if (wiggly) {
-						t = (i-1)/10.0;
+						t = (i-1)/((double)this->steps);
 						n = noise1(p-123.0); p += freq;
 						if (n < 0) n = -n;
 						t = t-n;
@@ -111,17 +116,15 @@ class Wiggle
 						x1 = (int)(lerp(t, ax, bx) + n * wx);
 						y1 = (int)(lerp(t, ay, by) + n * wy);
 					}
-					path.push_back(x2);
-					path.push_back(y2);
+					pts.push_back(x2);
+					pts.push_back(y2);
 					x1 = x2;
 					y1 = y2;		
 				}
-				
-				path.push_back(bx);
-				path.push_back(by);
+				pts.push_back(bx);
+				pts.push_back(by);
 			}
-			}
-		 
+		}
 	};
 
 

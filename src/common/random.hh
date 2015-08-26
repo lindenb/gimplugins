@@ -4,34 +4,17 @@
 #include <ctime>
 #include <cstdlib>
 
-
 class Random
 	{
-	private:
-		unsigned int seed;
 	public:
-		Random()
-			{
-			this->seed = (unsigned int)std::clock();
-			std::srand(seed);
-			}
-		Random(unsigned int seed):seed(seed)
-			{
-			std::srand(seed);
-			}
-		int nextInt(int max)
-			{
-			return rand_r(&seed)%max;
-			}
-		double rnd()
-			{
-			return (double)rand_r(&seed)/(double)RAND_MAX;
-			}
-		bool nextBool()
-			{
-			return nextInt(2)==0;
-			}
-		
+		Random(unsigned int seed) {std::srand(seed);}
+		Random() {std::srand(0U);}
+		~Random() {}
+		void reset(unsigned int seed) {std::srand(seed);}
+		int nextInt(int i) { return std::rand()%i;}
+		int nextInt(int beg,int end) { return beg+nextInt(end-beg);}
+		double rnd() { return (double)std::rand()/(double)RAND_MAX;}
+		int sign() { return (std::rand()%2==0?-1:1);}
 	};
 
 #endif
