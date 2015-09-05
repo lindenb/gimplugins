@@ -11,6 +11,7 @@
 #include <libgimp/gimp.h>
 #include <libgimp/gimpui.h>
 #include <libgimp/gimpcompat.h>
+#include "common/xcairo.hh"
 
 struct XColorRGB
 	{
@@ -129,11 +130,9 @@ class XDrawable:public XItem
 			::gimp_drawable_flush(drawable());
 			}
 		guint8 *  get_pixel(gint x_coord,gint y_coord,gint *num_channels)
-		{
-		return ::gimp_drawable_get_pixel(id(),x_coord,y_coord,num_channels);
-		}
-
-
+			{
+			return ::gimp_drawable_get_pixel(id(),x_coord,y_coord,num_channels);
+			}
 
 		gboolean  is_rgb()
 			{
@@ -180,7 +179,49 @@ class XDrawable:public XItem
 			{
 			return update(mask_bounds().rect());
                         }
+         void gimp_detach()
+         	{
+            ::gimp_drawable_detach (this->drawable());
+			}
 	};
+
+
+class XPreview
+	{
+	private:
+		 GimpPreview* _preview;
+	public:
+		XPreview( GimpPreview* preview):_preview(_preview)
+			{
+
+			}
+		XPreview(const XPreview& cp):_preview(cp._preview)
+			{
+
+			}
+		XPreview& operator=(const XPreview& cp)
+			{
+			if(this!=&cp)
+				{
+				this->_preview = cp._preview;
+				}
+			return *this;
+			}
+			
+		GimpPreview* preview()
+			{
+			return this->_preview;
+			}
+		void draw()
+			{
+			::gimp_preview_draw(preview());
+			}
+		void invalidate()
+			{
+			::gimp_preview_invalidate(preview());
+			}
+	};
+
 
 class XTileIterator1
 	{
@@ -295,5 +336,7 @@ class XTileIterator1
 			return p;
 			}
 	};
+
+
 
 #endif /* SRC_COMMON_XGIMP_HH_ */
