@@ -24,7 +24,9 @@ class XCairo
 				std::cerr << "Cannot create cairo "<< std::endl;
 				std::exit(EXIT_FAILURE);
 				}
+#if CAIRO_VERSION_MAJOR >= 1 && CAIRO_VERSION_MINOR >= 12  
 			::cairo_set_antialias(cr,CAIRO_ANTIALIAS_BEST);
+#endif
 			::cairo_set_line_cap (cr,CAIRO_LINE_CAP_ROUND);
 			}
 	
@@ -42,7 +44,9 @@ class XCairo
 				std::cerr << "Cannot create cairo "<< std::endl;
 				std::exit(EXIT_FAILURE);
 				}
+#if CAIRO_VERSION_MAJOR >= 1 && CAIRO_VERSION_MINOR >= 12  
 			::cairo_set_antialias(cr,CAIRO_ANTIALIAS_BEST);
+#endif
 			::cairo_set_line_cap (cr,CAIRO_LINE_CAP_ROUND);
 			}
 		void flush()

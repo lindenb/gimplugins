@@ -69,7 +69,7 @@ class XItem
 		virtual gint32 id()=0;
 		gboolean  is_visible()
 			{
-			return ::gimp_item_get_visible(id());
+			return ::gimp_drawable_get_visible(id());
 			}
 	};
 
@@ -191,6 +191,9 @@ class XPreview
 	private:
 		 GimpPreview* _preview;
 	public:
+		XPreview():_preview(0)
+			{
+			}
 		XPreview( GimpPreview* preview):_preview(_preview)
 			{
 
@@ -212,14 +215,22 @@ class XPreview
 			{
 			return this->_preview;
 			}
+		
+		bool nil ()
+			{
+			return preview()==0;
+			}
+			
 		void draw()
 			{
-			::gimp_preview_draw(preview());
+			if(!nil()) ::gimp_preview_draw(preview());
 			}
 		void invalidate()
 			{
-			::gimp_preview_invalidate(preview());
+			if(!nil()) ::gimp_preview_invalidate(preview());
 			}
+		
+		
 	};
 
 
