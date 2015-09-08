@@ -58,7 +58,10 @@ typedef struct <xsl:value-of select="$pluginname"/>Vals_t
 	} <xsl:value-of select="$pluginname"/>Vals;
 
 /** plugin class */
-class <xsl:value-of select="$pluginname"/> : public AbstractPlugin&lt;<xsl:value-of select="$pluginname"/>Vals&gt;
+class <xsl:value-of select="$pluginname"/> : public <xsl:choose>
+		<xsl:when test="@extend"><xsl:value-of select="@extend"/></xsl:when>
+		<xsl:otherwise>AbstractPlugin&lt;<xsl:value-of select="$pluginname"/>Vals&gt;</xsl:otherwise>
+	</xsl:choose>
 	{
 	public:
 		static <xsl:value-of select="$pluginname"/>Vals PREFS;

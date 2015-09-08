@@ -170,7 +170,7 @@ class XDrawable:public XItem
 		gboolean update(gint x,  gint y, gint width,  gint height)
 			{
 			return ::gimp_drawable_update(id(),x,y,width,height);
-                        }
+          	}
                 gboolean update(XRect<gint> rect)
 			{
 			return update(rect.x,rect.y,rect.width,rect.height);
@@ -194,7 +194,7 @@ class XPreview
 		XPreview():_preview(0)
 			{
 			}
-		XPreview( GimpPreview* preview):_preview(_preview)
+		XPreview( GimpPreview* preview):_preview(preview)
 			{
 
 			}
@@ -211,14 +211,14 @@ class XPreview
 			return *this;
 			}
 			
-		GimpPreview* preview()
+		GimpPreview* preview() const
 			{
 			return this->_preview;
 			}
 		
-		bool nil ()
+		bool nil () const
 			{
-			return preview()==0;
+			return preview() == 0;
 			}
 			
 		void draw()
@@ -230,7 +230,50 @@ class XPreview
 			if(!nil()) ::gimp_preview_invalidate(preview());
 			}
 		
+		void get_position(gint* x,gint* y)
+			{
+			if(!nil()) gimp_preview_get_position (preview(),x,y);
+			}
 		
+		gint x()
+			{
+			gint _x,_y;
+			get_position(&_x,&_y);
+			return _x;
+			}
+		gint y()
+			{
+			gint _x,_y;
+			get_position(&_x,&_y);
+			return _y;
+			}
+		
+		void get_size(gint* w,gint* h)
+			{
+			if(!nil()) gimp_preview_get_size (preview(),w,h);
+			}
+		
+		gint width()
+			{
+			gint _w,_h;
+			get_size(&_w,&_h);
+			return _w;
+			}
+		gint height()
+			{
+			gint _w,_h;
+			get_size(&_w,&_h);
+			return _h;
+			}
+      	operator bool () const
+      		{
+      		return !nil();
+      		}
+      	void draw_region(const GimpPixelRgn *region)
+      		{
+      		if(!nil()) ::gimp_drawable_preview_draw_region(GIMP_DRAWABLE_PREVIEW(preview()),region);
+      		}
+      
 	};
 
 
@@ -240,8 +283,9 @@ class XTileIterator1
 		GimpPixelRgn _src_rgn, _dest_rgn;
 		gpointer pr;
   		bool has_alpha;
+  		XCairo* xcairo;
 	public:
-		XTileIterator1(XDrawable& drawable):pr(NULL)
+		XTileIterator1(XDrawable& drawable,XPreview& preview):pr(NULL),xcairo(0)
 			{
 			XBound<gint> rect;
 			drawable.mask_bounds(&rect);
@@ -255,14 +299,14 @@ class XTileIterator1
 		       		FALSE,
 		       		FALSE
 		       		);
-		       	::gimp_pixel_rgn_init (
+		    ::gimp_pixel_rgn_init (
 				&_dest_rgn,
 				drawable.drawable(),
 		       		rect.x(),
 		       		rect.y(),
 		       		rect.width(),
 		       		rect.height(),
-		       		TRUE,
+		       		preview.nil(),
 		       		TRUE
 		       		);
       			has_alpha = drawable.has_alpha();
@@ -270,6 +314,10 @@ class XTileIterator1
 			}
 		~XTileIterator1()
 			{
+			if( xcairo != 0)
+				{
+				delete xcairo;
+				}
 			}
 		
 		bool ok() const 
@@ -282,6 +330,12 @@ class XTileIterator1
 			}
 		XTileIterator1& operator++()
 			{
+			if( xcairo != 0)
+				{
+				delete xcairo;
+				xcairo = 0;
+				}
+			
 			if(pr!=NULL)
 				{
 				pr = ::gimp_pixel_rgns_process(pr);
@@ -310,42 +364,35 @@ class XTileIterator1
 			{
 			return _at(&_dest_rgn,y,x);
 			}
-			
-		bool contains(gint y,gint x)
+		
+		XCairo* cairo()
 			{
-			/*boolean b= !(
-				y<0 ||
-				x<0 ||
-				x >= (this->x()+this->witdh()) ||
-				y >= (this->y()+this->height())
-				);
-			return b;*/
-			return true;
+			if( xcairo == 0 )
+				{
+				cairo_surface_t* s= ::cairo_image_surface_create_for_data (
+					 _dest_rgn.data,
+				     CAIRO_FORMAT_ARGB32,
+				      _dest_rgn.w,
+				      _dest_rgn.h,
+				      _dest_rgn.rowstride
+				     );
+			    cairo_status_t status= ::cairo_surface_status (s);
+				if(status!=CAIRO_STATUS_SUCCESS)
+					{
+					std::cerr <<  cairo_status_to_string(status) << std::endl;
+					}
+				
+			    this->xcairo = new XCairo(s);
+			    this->xcairo->translate(
+		             -(_dest_rgn.x),
+		             -(_dest_rgn.y)
+		             );
+			    
+				}
+			return xcairo;
 			}
 		
-		void setPixel(gint y,gint x,guchar* pix)
-			{
-			if(!contains(y,x)) return;
-			guchar* d = dest_at(y,x);
-			d[0]=pix[0];
-			d[1]=pix[1];
-			d[2]=pix[2];
-			}
-		
-		struct Pixel
-			{
-			XTileIterator1* owner;
-			gint y,x;
-			};
-		
-		Pixel at(gint y,gint x)
-			{
-			Pixel p;
-			p.owner = this;
-			p.y = y;
-			p.x = x;
-			return p;
-			}
+
 	};
 
 

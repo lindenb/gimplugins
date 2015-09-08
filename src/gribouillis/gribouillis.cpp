@@ -26,15 +26,25 @@ void gribouillis::run(XDrawable xdrawable,XPreview preview)
   gint    progress, max_progress;
   gint    has_alpha, alpha;
   gint    x1, y1, x2, y2;
-  gint    x, y;
+  guint    x, y;
   gpointer pr;
   //gint  red, green, blue
   GimpDrawable *drawable = xdrawable.drawable();
-
-  /* Get selection area */
-  gimp_drawable_mask_bounds (drawable->drawable_id, &x1, &y1, &x2, &y2);
-  has_alpha = gimp_drawable_has_alpha (drawable->drawable_id);
-
+	
+	
+  if(preview)
+  	{
+  	x1 = preview.x();
+  	y1 = preview.y();
+  	x2 = x1 + preview.width();
+    y2 = y1 + preview.height();
+  	}
+  else
+  	{
+    /* Get selection area */
+    xdrawable.mask_bounds( &x1, &y1, &x2, &y2);
+    has_alpha = xdrawable.has_alpha();
+	}
   //red = 0; green = 1; blue = 2;
 
   alpha = (has_alpha) ? drawable->bpp - 1 : drawable->bpp;
@@ -47,7 +57,7 @@ void gribouillis::run(XDrawable xdrawable,XPreview preview)
   gimp_pixel_rgn_init (&src_rgn, drawable,
 		       x1, y1, (x2 - x1), (y2 - y1), FALSE, FALSE);
   gimp_pixel_rgn_init (&dest_rgn, drawable,
-		       x1, y1, (x2 - x1), (y2 - y1), TRUE, TRUE);
+		       x1, y1, (x2 - x1), (y2 - y1), preview.nil(), TRUE);
 
   for (pr = gimp_pixel_rgns_register (2, &src_rgn, &dest_rgn);
        pr != NULL;
@@ -105,14 +115,22 @@ cerr << "ok " << dest_rgn.w << "/" << dest_rgn.h << endl;
 
       /* Update progress */
       progress += src_rgn.w * src_rgn.h;
-
-      gimp_progress_update ((double) progress / (double) max_progress);
+	 if (! preview )
+	 	{
+        ::gimp_progress_update ((double) progress / (double) max_progress);
+        }
     }
-
-  /*  update the region  */
-  gimp_drawable_flush (drawable);
-  gimp_drawable_merge_shadow (drawable->drawable_id, TRUE);
-  gimp_drawable_update (drawable->drawable_id, x1, y1, (x2 - x1), (y2 - y1));
+  if (preview)
+  	{
+  	preview.draw_region (&dest_rgn);
+  	}
+  else
+  	  {
+	  /*  update the region  */
+	  xdrawable.flush();
+	  xdrawable.merge_shadow(TRUE);
+	  xdrawable.update(x1, y1, (x2 - x1), (y2 - y1));
+	  }
 
 }
 

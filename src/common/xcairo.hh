@@ -18,7 +18,7 @@ class XCairo
 				std::cerr << "Cannot create image surface "<< std::endl;
 				std::exit(EXIT_FAILURE);
 				}
-			cr = cairo_create (surface);
+			cr = ::cairo_create (surface);
 			if(cr == NULL)
 				{
 				std::cerr << "Cannot create cairo "<< std::endl;
@@ -107,6 +107,10 @@ class XCairo
 		void fill()
 			{
 			::cairo_fill (cr);
+			}
+		void translate(double tx,double ty)
+			{
+			::cairo_translate(cr,tx,ty);
 			}
 	};
 
