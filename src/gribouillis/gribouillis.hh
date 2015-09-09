@@ -33,30 +33,54 @@ void gribouillis::run(XDrawable xdrawable,XPreview preview)
     xdrawable.mask_bounds( &x1, &y1, &x2, &y2);
    
 	}
-  Random rand;
-  long seed=0L;
+  
+  DEBUG(preview << x1 << "," << y1 << "," << x2<<"," << y2);
+  
+  long seed=std::time(NULL);
+  long occurences = (long)((xdrawable.width()*xdrawable.height())*prefs()->proba);
+  occurences=50;
   XTileIterator1 iter(xdrawable,preview);
+  long n=0;
   while(iter.ok())
   	{
-  	rand.reset(seed);
-  	iter.copy();
-  
+  	Random rand(seed);
+
+
   	XCairo* ctx = iter.cairo();
-  	for(int i=0;i< 1000;++i)
+	
+  	for(long i=0;i< occurences;++i)
   		{
-  		double g = 0.5+rand.rnd(0.5);
-	  	 ctx->gray(g);
-		 ctx->circle(
-		 	rand.rnd(x2-x1),
-		 	rand.rnd(y2-y1),
-		 	2+rand.rnd(50)
-		 	);
+  		double g = rand.rnd(
+  			std::max(0.0,std::min(prefs()->mingray,prefs()->maxgray)),
+  			std::min(1.0,std::max(prefs()->mingray,prefs()->maxgray))
+  			)
+  			;
+  		double a = rand.rnd(
+  			std::max(0.0,std::min(prefs()->minalpha,prefs()->maxalpha)),
+  			std::min(1.0,std::max(prefs()->minalpha,prefs()->maxalpha))
+  			)
+  			;
+  			
+  		 double cx= rand.rnd(x2-x1);
+  		 double cy= rand.rnd(y2-y1);
+  		 double r = rand.rnd(
+		 		std::min(prefs()->minradius,prefs()->maxradius),
+  				std::max(prefs()->minradius,prefs()->maxradius)
+		 		);
+		 //DEBUG("g"<<g << " a:" << a << " c:" << cx<<","<<cy<<"," << r);
+		 
+	  	ctx->gray(g,a);
+		ctx->circle( cx, cy, r );
 		ctx->fill();
+		++n;
 		}
+	ctx->flush();
+	
   	++iter;
     }
-  if (preview)
+  if (!preview.nil())
   	{
+  	DEBUG("draw region " << n);
   	preview.draw_region (iter.destination());
   	}
   else

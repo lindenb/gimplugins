@@ -9,7 +9,7 @@ install: ${SRCNAME}
 
 
 ${SRCNAME} : $(addprefix ${SRCNAME},.tab.cpp .tab.hh .hh)
-	g++ -o $@ -I.. -Wall  $< `$(GIMPTOOL) --cflags --libs` 
+	g++ -g -o $@ -I.. -Wall  $< `$(GIMPTOOL) --cflags --libs` 
 
 
 $(addsuffix .tab.cpp,${SRCNAME}) :  ../common/params2c.xsl $(addsuffix .xml,${SRCNAME})

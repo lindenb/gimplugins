@@ -1,5 +1,24 @@
 <plugin name="gribouillis">
 	<vbox>
 	<preview/>
+	<frame label="Propability">
+		<vbox>
+			<param name="proba" type="double" default="0.01" label="Propability" min="0.0" max="1.0"/>
+		</vbox>
+	</frame>
+	<frame label="Colors">
+		<vbox>
+			<param name="mingray" type="double" default="0.01" label="Min. Gray" min="0.0" max="1.0"/>
+			<param name="maxgray" type="double" default="0.6" label="Max. Gray" min="0.0" max="1.0"/>
+			<param name="minalpha" type="double" default="0.1" label="Min. Alpha" min="0.0" max="1.0"/>
+			<param name="maxalpha" type="double" default="0.8" label="Max. Alpha" min="0.0" max="1.0"/>
+		</vbox>
+	</frame>
+	<frame label="Sizes">
+		<vbox>
+			<param name="minradius" type="double" default="0.01" label="Min. Radius" min="0.0" max="100000"/>
+			<param name="maxradius" type="double" default="50" label="Max. Radius" min="0.0" max="100000"/>
+		</vbox>
+	</frame>
 	</vbox>
 </plugin>

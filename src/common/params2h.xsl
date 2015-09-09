@@ -48,9 +48,26 @@ class <xsl:value-of select="$pluginname"/> : public <xsl:choose>
 		virtual gboolean dialog(XDrawable drawable);
 		virtual void run (XDrawable drawable, XPreview preview);
 		
+		
+		
 	};
 
 
+</xsl:template>
+
+<xsl:template match="param" mode="field">
+/* <xsl:apply-templates select="." mode="label"/> : <xsl:apply-templates select="." mode="description"/> */
+	<xsl:choose>
+		<xsl:when test="@type='int' or @type='gint'">gint</xsl:when>
+		<xsl:when test="@type='bool' or @type='boolean'">gboolean</xsl:when>
+		<xsl:when test="@type='double' or @type='gdouble'">gdouble</xsl:when>
+		<xsl:when test="@type='float' or @type='gfloat'">gfloat</xsl:when>
+		<xsl:otherwise><xsl:value-of select="@type"/></xsl:otherwise>
+	</xsl:choose>
+<xsl:text>	</xsl:text>
+<xsl:value-of select="@name"/>
+<xsl:text>;
+</xsl:text>
 </xsl:template>
 
 

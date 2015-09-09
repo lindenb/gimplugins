@@ -133,6 +133,16 @@ class XCairo
            this->arc(xc,yc,radius,0,PI2);
            }
 		
+		void status()
+			{
+			cairo_status_t status= ::cairo_surface_status(this->surface);
+			if(status!=CAIRO_STATUS_SUCCESS)
+				{
+				std::cerr <<  cairo_status_to_string(status) << std::endl;
+				}
+			}
+		
+		
 	};
 
 #endif

@@ -6,16 +6,20 @@
 
 class Random
 	{
+	private:
+		unsigned int _seed;
 	public:
-		Random(unsigned int seed) {std::srand(seed);}
-		Random() {std::srand(0U);}
+		Random(unsigned int seed):_seed(seed) {}
+		Random():_seed(std::time(NULL)) {}
 		~Random() {}
-		void reset(unsigned int seed) {std::srand(seed);}
-		int nextInt(int i) { return std::rand()%i;}
+		void reset(unsigned int seed) {this->_seed=seed;}
+		unsigned int seed() { return _seed;}
+		int nextInt(int i) { return ::rand_r(&_seed)%i;}
 		int nextInt(int beg,int end) { return beg+nextInt(end-beg);}
-		double rnd() { return (double)std::rand()/(double)RAND_MAX;}
-		int sign() { return (std::rand()%2==0?-1:1);}
-		double nextDouble(double beg,double end) { return beg+(end-beg)*rnd();}
+		double rnd() { return (double)::rand_r(&_seed)/(double)RAND_MAX;}
+		bool boolean() {  return (::rand_r(&_seed)%2==0);}
+		int sign() { return (boolean()?-1:1);}
+		double rnd(double beg,double end) { return beg+(end-beg)*rnd();}
 		double rnd(double beg) { return beg*rnd();}
 	};
 

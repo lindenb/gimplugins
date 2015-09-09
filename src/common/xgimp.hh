@@ -12,6 +12,7 @@
 #include <libgimp/gimpui.h>
 #include <libgimp/gimpcompat.h>
 #include <cstring>
+#include "common/debug.hh"
 #include "common/xcairo.hh"
 
 struct XColorRGB
@@ -325,21 +326,21 @@ class XTileIterator1
 		gpointer pr;
   		bool has_alpha;
   		XCairo* xcairo;
+  		bool is_preview;
 	public:
 		XTileIterator1(XDrawable& drawable,XPreview& preview):pr(NULL),xcairo(0)
 			{
 			gint x,y,width,height;
-			XBound<gint> rect;
-			drawable.mask_bounds(&rect);
+
 			
-			if(preview)
+			is_preview = !preview.nil();
+			
+			if(is_preview)
 				{
-				x = preview.x();
-  				y = preview.y();
-			  	width = preview.width();
-				height =  preview.height();
+				preview.get_position (&x, &y);
+      			preview.get_size ( &width, &height);
 				}
-			if(drawable.selection_is_empty())
+			else if(drawable.selection_is_empty())
 				{
 				x=0;
 				y=0;
@@ -354,24 +355,25 @@ class XTileIterator1
 				height = y2-y;
 				}
 			
+			
 			/* A "dirty" tile is one that has been changed. Tiles that are not dirty won't be written back to GIMP, whereas dirty ones will be. Initializing a pixel region as "dirty" indicates to gimp_pixel_rgns_process that it should treat tiles in that region as if you've dirtied them. 
 			*/
 			/* "Shadow tiles are merely an indication of the desire to use a temporary buffer for writing in to */
 			::gimp_pixel_rgn_init (
 				&_src_rgn,
 				drawable.drawable(),
-			   		x,y,width,height,
-			   		FALSE, /* dirty */
-			   		FALSE /* shadow */
-			   		);
+		   		x,y,width,height,
+		   		FALSE, /* dirty */
+		   		FALSE /* shadow */
+		   		);
 			
 			::gimp_pixel_rgn_init (
 				&_dest_rgn,
 				drawable.drawable(),
-			   		x,y,width,height,
-			   		preview.nil(),/* dirty */
-			   		TRUE/* shadow */
-			   		);
+		   		x,y,width,height,
+		   		!is_preview,
+		   		TRUE/* shadow */
+		   		);
 		       	
   			has_alpha = drawable.has_alpha();
   			pr = ::gimp_pixel_rgns_register (2, &_src_rgn, &_dest_rgn);
@@ -380,7 +382,14 @@ class XTileIterator1
 			{
 			if( xcairo != 0)
 				{
+				xcairo->flush();
+				xcairo->status();
 				delete xcairo;
+				xcairo=0;
+				}
+			if(!this->is_preview)
+				{
+				::gimp_progress_end();
 				}
 			}
 		
@@ -405,6 +414,7 @@ class XTileIterator1
 			{
 			if( xcairo != 0)
 				{
+				xcairo->flush();
 				delete xcairo;
 				xcairo = 0;
 				}
@@ -412,6 +422,10 @@ class XTileIterator1
 			if(pr!=NULL)
 				{
 				pr = ::gimp_pixel_rgns_process(pr);
+				if(!this->is_preview)
+					{
+					 :: gimp_progress_pulse();
+					 }
 				}
 			return *this;
 			}
@@ -442,6 +456,7 @@ class XTileIterator1
 			{
 			if( xcairo == 0 )
 				{
+				
 				cairo_surface_t* s= ::cairo_image_surface_create_for_data (
 					 _dest_rgn.data,
 				     CAIRO_FORMAT_ARGB32,
@@ -449,6 +464,7 @@ class XTileIterator1
 				      _dest_rgn.h,
 				      _dest_rgn.rowstride
 				     );
+				
 			    cairo_status_t status= ::cairo_surface_status (s);
 				if(status!=CAIRO_STATUS_SUCCESS)
 					{
@@ -460,18 +476,19 @@ class XTileIterator1
 		             -(_dest_rgn.x),
 		             -(_dest_rgn.y)
 		             );
-			    
+			   
 				}
 			return xcairo;
 			}
 		/* copy source to destination */
 		void copy()
 			{
+			/*
 			std::memcpy(
 				(void*)_src_rgn.data,
 				(void*)_dest_rgn.data,
 				(_dest_rgn.h*_dest_rgn.rowstride)
-				);
+				);*/
 			}
 
 	};
