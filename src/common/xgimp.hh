@@ -11,6 +11,7 @@
 #include <libgimp/gimp.h>
 #include <libgimp/gimpui.h>
 #include <libgimp/gimpcompat.h>
+#include <cstring>
 #include "common/xcairo.hh"
 
 struct XColorRGB
@@ -120,6 +121,11 @@ class XDrawable:public XItem
 		gboolean is_layer() { return ::gimp_drawable_is_layer(id());}
 		gboolean is_layer_mask() { return ::gimp_drawable_is_layer_mask(id());}
 		gboolean is_text_layer() { return ::gimp_drawable_is_text_layer(id());}
+		gboolean selection_is_empty() 
+			{
+			return ::gimp_selection_is_empty (image());
+			}
+	
 
 		void detach()
 			{
@@ -133,15 +139,32 @@ class XDrawable:public XItem
 			{
 			return ::gimp_drawable_get_pixel(id(),x_coord,y_coord,num_channels);
 			}
-
+		
+		GimpImageType  type()
+			{
+			return ::gimp_drawable_type(id());
+			}
+		
+		GimpImageType  type_with_alpha()
+			{
+			return ::gimp_drawable_type_with_alpha(id());
+			}
+		
+		gboolean  is_gray()
+			{
+			return :: gimp_drawable_is_gray(id());
+			}
 		gboolean  is_rgb()
 			{
 			return ::gimp_drawable_is_rgb(id());
 			}
+
+		
 		gboolean mask_bounds(gint *x1,gint *y1,gint *x2,gint *y2)
 			{
 			return ::gimp_drawable_mask_bounds(id(),x1,y1,x2,y2);
 			}
+		
 		gboolean mask_bounds(XBound<gint>* b)
 			{
 			return this->mask_bounds(&(b->x1),&(b->y1),&(b->x2),&(b->y2));
@@ -183,6 +206,24 @@ class XDrawable:public XItem
          	{
             ::gimp_drawable_detach (this->drawable());
 			}
+		void offsets(gint      *offset_x, gint      *offset_y)
+			{
+			::gimp_drawable_offsets(id(),offset_x,offset_y);
+			}
+		gint x()
+			{
+			gint a,b;
+			offsets(&a,&b);
+			return a;
+			}	
+		gint y()
+			{
+			gint a,b;
+			offsets(&a,&b);
+			return b;
+			}
+		
+		
 	};
 
 
@@ -287,30 +328,53 @@ class XTileIterator1
 	public:
 		XTileIterator1(XDrawable& drawable,XPreview& preview):pr(NULL),xcairo(0)
 			{
+			gint x,y,width,height;
 			XBound<gint> rect;
 			drawable.mask_bounds(&rect);
+			
+			if(preview)
+				{
+				x = preview.x();
+  				y = preview.y();
+			  	width = preview.width();
+				height =  preview.height();
+				}
+			if(drawable.selection_is_empty())
+				{
+				x=0;
+				y=0;
+				width = drawable.width();
+				height = drawable.height();
+				}
+			else
+				{
+				gint x2,y2;
+				drawable.mask_bounds(&x,&y,&x2,&y2);
+				width = x2-x;
+				height = y2-y;
+				}
+			
+			/* A "dirty" tile is one that has been changed. Tiles that are not dirty won't be written back to GIMP, whereas dirty ones will be. Initializing a pixel region as "dirty" indicates to gimp_pixel_rgns_process that it should treat tiles in that region as if you've dirtied them. 
+			*/
+			/* "Shadow tiles are merely an indication of the desire to use a temporary buffer for writing in to */
 			::gimp_pixel_rgn_init (
 				&_src_rgn,
 				drawable.drawable(),
-		       		rect.x(),
-		       		rect.y(),
-		       		rect.width(),
-		       		rect.height(),
-		       		FALSE,
-		       		FALSE
-		       		);
-		    ::gimp_pixel_rgn_init (
+			   		x,y,width,height,
+			   		FALSE, /* dirty */
+			   		FALSE /* shadow */
+			   		);
+			
+			::gimp_pixel_rgn_init (
 				&_dest_rgn,
 				drawable.drawable(),
-		       		rect.x(),
-		       		rect.y(),
-		       		rect.width(),
-		       		rect.height(),
-		       		preview.nil(),
-		       		TRUE
-		       		);
-      			has_alpha = drawable.has_alpha();
-      			pr = ::gimp_pixel_rgns_register (2, &_src_rgn, &_dest_rgn);
+			   		x,y,width,height,
+			   		preview.nil(),/* dirty */
+			   		TRUE/* shadow */
+			   		);
+		       	
+  			has_alpha = drawable.has_alpha();
+  			pr = ::gimp_pixel_rgns_register (2, &_src_rgn, &_dest_rgn);
 			}
 		~XTileIterator1()
 			{
@@ -318,6 +382,15 @@ class XTileIterator1
 				{
 				delete xcairo;
 				}
+			}
+		
+		GimpPixelRgn* source()
+			{
+			return &_src_rgn;
+			}
+		GimpPixelRgn* destination()
+			{
+			return &_dest_rgn;
 			}
 		
 		bool ok() const 
@@ -358,11 +431,11 @@ class XTileIterator1
 	public:
 		guchar* src_at(gint y,gint x)
 			{
-			return _at(&_src_rgn,y,x);
+			return _at(source(),y,x);
 			}
 		guchar* dest_at(gint y,gint x)
 			{
-			return _at(&_dest_rgn,y,x);
+			return _at(destination(),y,x);
 			}
 		
 		XCairo* cairo()
@@ -391,7 +464,15 @@ class XTileIterator1
 				}
 			return xcairo;
 			}
-		
+		/* copy source to destination */
+		void copy()
+			{
+			std::memcpy(
+				(void*)_src_rgn.data,
+				(void*)_dest_rgn.data,
+				(_dest_rgn.h*_dest_rgn.rowstride)
+				);
+			}
 
 	};
 

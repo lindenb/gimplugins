@@ -3,7 +3,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <cairo/cairo.h>
-
+#include "common/trigonometry.hh"
 
 class XCairo
 	{
@@ -75,10 +75,16 @@ class XCairo
 			}
 		
 
-		void gray(int g)
+		void gray(double g)
 			{
 			rgb(g,g,g);
 			}
+		
+		void gray(double g,double a)
+			{
+			rgba(g,g,g,a);
+			}
+		
 		void rectangle(double x,double y,double  w,double h)
 			{
 			::cairo_rectangle(cr,x,y,w,h);
@@ -112,6 +118,21 @@ class XCairo
 			{
 			::cairo_translate(cr,tx,ty);
 			}
+		
+		void arc(double xc,
+           double yc,
+           double radius,
+           double angle1,
+           double angle2)
+           {
+           ::cairo_arc(cr,xc,yc,radius,angle1,angle2);
+           }
+          
+		void circle(double xc,  double yc,  double radius  )
+           {
+           this->arc(xc,yc,radius,0,PI2);
+           }
+		
 	};
 
 #endif

@@ -15,7 +15,8 @@ class Random
 		int nextInt(int beg,int end) { return beg+nextInt(end-beg);}
 		double rnd() { return (double)std::rand()/(double)RAND_MAX;}
 		int sign() { return (std::rand()%2==0?-1:1);}
-		double nextDouble(int beg,int end) { return beg+(end-beg)*rnd();}
+		double nextDouble(double beg,double end) { return beg+(end-beg)*rnd();}
+		double rnd(double beg) { return beg*rnd();}
 	};
 
 #endif

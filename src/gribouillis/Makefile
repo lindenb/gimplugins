@@ -8,14 +8,15 @@ install: ${SRCNAME}
 	$(GIMPTOOL) --install-bin $<
 
 
-${SRCNAME} : $(addsuffix .o,${SRCNAME})
-	g++ -o $@   $< `$(GIMPTOOL) --libs` 
+${SRCNAME} : $(addprefix ${SRCNAME},.tab.cpp .tab.hh .hh)
+	g++ -o $@ -I.. -Wall  $< `$(GIMPTOOL) --cflags --libs` 
 
-$(addsuffix .o,${SRCNAME}) : $(addsuffix .cpp,${SRCNAME}) $(addsuffix .h,${SRCNAME})
-	g++ -c -Wall -I.. `$(GIMPTOOL) --cflags` $< 
 
-$(addsuffix .h,${SRCNAME}) :  ../common/params2c.xsl $(addsuffix .xml,${SRCNAME})
+$(addsuffix .tab.cpp,${SRCNAME}) :  ../common/params2c.xsl $(addsuffix .xml,${SRCNAME})
+	xsltproc --output $@ $^ 
+
+$(addsuffix .tab.hh,${SRCNAME}) :  ../common/params2h.xsl $(addsuffix .xml,${SRCNAME})
 	xsltproc --output $@ $^ 
 
 clean:
-	rm -f ${SRCNAME} *.o $(addsuffix .h,${SRCNAME})
+	rm -f ${SRCNAME} *.o $(addprefix ${SRCNAME},.tab.cpp .tab.hh)

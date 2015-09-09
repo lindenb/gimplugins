@@ -1,34 +1,28 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-
+<xsl:import href="mod.plugin.xsl"/>
 <xsl:output method="text"/>
-<xsl:variable name="pluginname" select="/plugin/@name"/>
+
+<xsl:variable name="instanceclass">
+	<xsl:choose>
+		<xsl:when test="/plugin/@instanceclass"><xsl:value-of select="/plugin/@instanceclass"/></xsl:when>
+		<xsl:otherwise><xsl:value-of select="$pluginname"/></xsl:otherwise>
+	</xsl:choose>
+</xsl:variable>
 
 <xsl:template match="/">
+#include "<xsl:value-of select="$pluginname"/>.hh"
 
-#ifndef __<xsl:value-of select="$pluginname"/>_HEADER_
-#define __<xsl:value-of select="$pluginname"/>_HEADER_
-/** BEGIN : AUTO GENERATED CODE **/
 <xsl:apply-templates select="plugin"/>
 
-
-/** END   : AUTO GENERATED CODE **/
-#endif
 </xsl:template>
 
 <xsl:template match="plugin">
 
 
-static void      query  (void);
-static void      run    (gchar *name, gint nparams, GimpParam *param, gint *nreturn_vals, GimpParam **return_vals);
 
 
-GimpPlugInInfo PLUG_IN_INFO = {(GimpInitProc)NULL,(GimpQuitProc)NULL,(GimpQueryProc)query,(GimpRunProc)run};
-
-
-MAIN ()
-
-static void query (void) {
+static void <xsl:value-of select="$pluginname"/>_query (void) {
   static GimpParamDef args[] = {
     { GIMP_PDB_INT32, (gchar*)"run_mode", (gchar*)"Interactive, non-interactive" },
     { GIMP_PDB_IMAGE, (gchar*)"image", (gchar*)"Input image" },
@@ -50,42 +44,16 @@ static void query (void) {
 
 
 
-/** structure holding preferences */
-typedef struct <xsl:value-of select="$pluginname"/>Vals_t
-	{
-	<xsl:apply-templates select="//param" mode="field"/>
-	gboolean preview;
-	} <xsl:value-of select="$pluginname"/>Vals;
-
-/** plugin class */
-class <xsl:value-of select="$pluginname"/> : public <xsl:choose>
-		<xsl:when test="@extend"><xsl:value-of select="@extend"/></xsl:when>
-		<xsl:otherwise>AbstractPlugin&lt;<xsl:value-of select="$pluginname"/>Vals&gt;</xsl:otherwise>
-	</xsl:choose>
-	{
-	public:
-		static <xsl:value-of select="$pluginname"/>Vals PREFS;
-		<xsl:value-of select="$pluginname"/>()
-			{
-			}
-		virtual <xsl:value-of select="$pluginname"/>Vals* prefs();
-		virtual const char* name() const;
-		virtual gboolean dialog(XDrawable drawable);
-		virtual void run (XDrawable drawable, XPreview preview);
-		
-	};
-
-
 // run plug-in is the heart of the plug-in program
 // the parameters are name, inputparameters and a pointer to output parameters.
-static void run (
+static void <xsl:value-of select="$pluginname"/>_run (
      gchar   *name,
      gint     nparams,
      GimpParam  *param,
      gint    *nreturn_vals,
      GimpParam **return_vals)
 	{
-	<xsl:value-of select="$pluginname"/> instance;
+	<xsl:value-of select="$instanceclass"/> instance;
 	instance.run1(name,nparams,param,nreturn_vals,return_vals);
 	}
 
@@ -97,6 +65,9 @@ static void run (
 <xsl:apply-templates select="//param" mode="instance"/>
 1 /* preview */
 };
+
+
+
 
 <xsl:value-of select="$pluginname"/>Vals* <xsl:value-of select="$pluginname"/>::prefs()
 	{
@@ -145,6 +116,17 @@ gboolean <xsl:value-of select="$pluginname"/>::dialog(XDrawable drawable	)
     ::gtk_widget_destroy (dialog);
 	return run;
 	}
+	
+
+GimpPlugInInfo PLUG_IN_INFO = {
+	(GimpInitProc)NULL,
+	(GimpQuitProc)NULL,
+	(GimpQueryProc)<xsl:value-of select="$pluginname"/>_query,
+	(GimpRunProc)<xsl:value-of select="$pluginname"/>_run
+	};
+
+
+MAIN ()
 
 </xsl:template>
 

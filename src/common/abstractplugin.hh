@@ -29,6 +29,22 @@ class AbstractPlugin
 		virtual gboolean dialog(XDrawable drawable)=0;
 		virtual T* prefs()=0;
 		
+		virtual gboolean has_dialog()
+			{
+			return TRUE;
+			}
+		
+		virtual gboolean accept(XDrawable& d)
+			{
+			if(!d.is_layer()) return FALSE;
+			switch(d.type_with_alpha())
+				{
+				case GIMP_RGBA_IMAGE: return TRUE;break;
+				default:break; 
+				}
+			return FALSE;
+			}
+		
 		virtual void run1(
 			 gchar   *name,
 			 gint     nparams,
@@ -58,22 +74,46 @@ class AbstractPlugin
 				{
 				case GIMP_RUN_INTERACTIVE:
 				  {
-				  std::string pluginname("plug-in-");
-				  pluginname.append(this->name());
-				  /* Get options last values if needed */
-				  ::gimp_get_data (pluginname.c_str(), (this->prefs()));
-				  /* Display the dialog */
-				  if (! this->dialog (drawable))
-					return;
+				  if( ! accept(drawable))
+				  	{
+				  	::gimp_message("Cannot use this image");
+				  	values[0].data.d_status = GIMP_PDB_CALLING_ERROR;
+				  	return;
+				  	}
+				  if(has_dialog())
+				  	{
+					  std::string pluginname("plug-in-");
+					  pluginname.append(this->name());
+					  /* Get options last values if needed */
+					  ::gimp_get_data (pluginname.c_str(), (this->prefs()));
+					  /* Display the dialog */
+					  if (! this->dialog (drawable))
+					  	{
+					  	values[0].data.d_status = GIMP_PDB_CALLING_ERROR;
+						return;
+						}
+					}
 				  break;
 				  }
 				case GIMP_RUN_NONINTERACTIVE:
 					{
+					 if( ! accept(drawable))
+					  	{
+					  	std::cerr << "Cannot use this image" << std::endl;
+					  	values[0].data.d_status = GIMP_PDB_CALLING_ERROR;
+				  		return;
+					  	}
 					status = GIMP_PDB_CALLING_ERROR;
 				  	break;
 					}
 				case GIMP_RUN_WITH_LAST_VALS:
 					{
+					if( ! accept(drawable))
+					  	{
+					  	::gimp_message("Cannot use this image");
+					  	values[0].data.d_status = GIMP_PDB_CALLING_ERROR;
+				  		return;
+					  	}
 					std::string pluginname("plug-in-");
 					pluginname.append(this->name());
 					/* Get options last values if needed */
@@ -82,7 +122,8 @@ class AbstractPlugin
 				  	}
 				default: break;
 				}
-			  
+		if( status == GIMP_PDB_SUCCESS )
+			{
 			  this->run(drawable);
 
 			  ::gimp_displays_flush ();
@@ -96,7 +137,7 @@ class AbstractPlugin
 				::gimp_set_data (pluginname.c_str(), this->prefs(), sizeof (T));
 				}
 			 }
-		
+		}
 		
 	};
 
