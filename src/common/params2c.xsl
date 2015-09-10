@@ -82,7 +82,6 @@ const char* <xsl:value-of select="$pluginname"/>::name() const
 
 static void _preview_callback(GimpDrawable *drawable, GimpPreview  *preview)
 	{
-	DEBUG(" "&lt;&lt;drawable &lt;&lt; " "&lt;&lt; preview); 
 	if(drawable==NULL) return;
 	if(preview==NULL) return;
 	<xsl:value-of select="$instanceclass"/> instance;
@@ -114,6 +113,7 @@ gboolean <xsl:value-of select="$pluginname"/>::dialog(XDrawable drawable	)
 	<xsl:if test="count(.//preview)=1">
 	<xsl:variable name="previewid"><xsl:value-of select="generate-id(.//preview[1])"/></xsl:variable>
 	/** create preview */
+	prefs()->preview=TRUE;
 	GtkWidget* <xsl:value-of select="$previewid"/> = ::gimp_drawable_preview_new (
 			drawable.drawable(),
 			&amp;(prefs()->preview) /* unused anyway */
@@ -166,6 +166,8 @@ MAIN ()
 		</xsl:for-each>
 </xsl:template>
 
+
+
 <xsl:template match="vbox|hbox">
 GtkWidget* <xsl:value-of select="generate-id(.)"/> = <xsl:choose>
 		<xsl:when test="name(.)='vbox'">gtk_vbox_new</xsl:when>
@@ -177,6 +179,9 @@ gtk_box_pack_start (GTK_BOX (<xsl:value-of select="generate-id(..)"/>), <xsl:val
 </xsl:for-each>
 gtk_widget_show(<xsl:value-of select="generate-id(.)"/>);
 </xsl:template>
+
+
+
 
 <xsl:template match="param[@type='int' or @type='gint' or @type='double'  or @type='gdouble']">
 		/* container for <xsl:value-of select="@name"/> */
@@ -197,28 +202,28 @@ gtk_widget_show(<xsl:value-of select="generate-id(.)"/>);
 			"<xsl:apply-templates select="." mode="description"/>",
 			NULL);
 		
-		gfloat <xsl:value-of select="concat('min_',generate-id(.))"/> = <xsl:choose>
-        		<xsl:when test="@min">(gfloat)<xsl:value-of select="@min"/></xsl:when>
-        		<xsl:otherwise>(gfloat)(<xsl:value-of select="@default"/> -1)</xsl:otherwise>
+		gdouble <xsl:value-of select="concat('min_',generate-id(.))"/> = <xsl:choose>
+        		<xsl:when test="@min">(gdouble)<xsl:value-of select="@min"/></xsl:when>
+        		<xsl:otherwise>(gdouble)(<xsl:value-of select="@default"/> -1)</xsl:otherwise>
         	</xsl:choose>;
-        gfloat <xsl:value-of select="concat('max_',generate-id(.))"/> = <xsl:choose>
-        		<xsl:when test="@max">(gfloat)<xsl:value-of select="@max"/></xsl:when>
-        		<xsl:otherwise>(gfloat)(<xsl:value-of select="@default"/> +1)</xsl:otherwise>
+        gdouble <xsl:value-of select="concat('max_',generate-id(.))"/> = <xsl:choose>
+        		<xsl:when test="@max">(gdouble)<xsl:value-of select="@max"/></xsl:when>
+        		<xsl:otherwise>(gdouble)(<xsl:value-of select="@default"/> +1)</xsl:otherwise>
         	</xsl:choose>;
 		
 		/* adjustment for <xsl:value-of select="@name"/> */
         GtkObject* <xsl:value-of select="concat('adj',generate-id(.))"/> = ::gtk_adjustment_new (
-        	(gfloat)<xsl:value-of select="@default"/>,
-        	<xsl:value-of select="concat('min_',generate-id(.))"/>, 
-        	<xsl:value-of select="concat('max_',generate-id(.))"/>, 
+        	(gdouble)<xsl:value-of select="@default"/>,/* value */
+        	<xsl:value-of select="concat('min_',generate-id(.))"/>, /* min */
+        	<xsl:value-of select="concat('max_',generate-id(.))"/>, /* max */
         	<xsl:choose>
-        		<xsl:when test="@step">(gfloat)<xsl:value-of select="@step"/></xsl:when>
-        		<xsl:otherwise>(gfloat)((<xsl:value-of select="concat('max_',generate-id(.))"/> - <xsl:value-of select="concat('min_',generate-id(.))"/> )/1000.0)</xsl:otherwise>
-        	</xsl:choose>, 
+        		<xsl:when test="@step">(gdouble)<xsl:value-of select="@step"/></xsl:when>
+        		<xsl:otherwise>(gdouble)((<xsl:value-of select="concat('max_',generate-id(.))"/> - <xsl:value-of select="concat('min_',generate-id(.))"/> )/1000.0)</xsl:otherwise>
+        	</xsl:choose>, /* step_increment */
         	<xsl:choose>
-        		<xsl:when test="@page">(gfloat)<xsl:value-of select="@page"/></xsl:when>
-        		<xsl:otherwise>(gfloat)((<xsl:value-of select="concat('max_',generate-id(.))"/> - <xsl:value-of select="concat('min_',generate-id(.))"/> )/100.0)</xsl:otherwise>
-        	</xsl:choose>, 
+        		<xsl:when test="@page">(gdouble)<xsl:value-of select="@page"/></xsl:when>
+        		<xsl:otherwise>(gdouble)((<xsl:value-of select="concat('max_',generate-id(.))"/> - <xsl:value-of select="concat('min_',generate-id(.))"/> )/100.0)</xsl:otherwise>
+        	</xsl:choose>,  /* page_increment */
         	0 /* page size is always 0 */
         	);
         
@@ -232,6 +237,95 @@ gtk_widget_show(<xsl:value-of select="generate-id(.)"/>);
         ::gtk_widget_show (<xsl:value-of select="concat('spin',generate-id(.))"/>);
         ::gtk_box_pack_start (GTK_BOX (<xsl:value-of select="generate-id(.)"/>), <xsl:value-of select="concat('spin',generate-id(.))"/>, FALSE, FALSE, 6);
         ::gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (<xsl:value-of select="concat('spin',generate-id(.))"/>), TRUE);
+
+		/* connect spin and adjustement */
+        g_signal_connect (
+        	<xsl:value-of select="concat('adj',generate-id(.))"/>,
+			"value_changed",
+			<xsl:choose>
+        		<xsl:when test="@type='int'  or @type='gint'"> G_CALLBACK (gimp_int_adjustment_update)</xsl:when>
+        		<xsl:when test="@type='double' or @type='gdouble'"> G_CALLBACK (gimp_double_adjustment_update)</xsl:when>
+        		<xsl:when test="@type='float' or @type='gfloat'"> G_CALLBACK (gimp_float_adjustment_update)</xsl:when>
+        		<xsl:otherwise>BOUM</xsl:otherwise>
+        	</xsl:choose>, 
+             &amp;(prefs()-><xsl:value-of select="@name"/>)
+             );
+        if(preview!=NULL)
+        	{
+			 g_signal_connect_swapped (
+			  	<xsl:value-of select="concat('adj',generate-id(.))"/>,
+			  	"value_changed",
+				 G_CALLBACK (gimp_preview_invalidate),
+				 preview
+				 );
+			}
+</xsl:template>
+
+
+
+<xsl:template match="param[(@type='int' or @type='gint' or @type='double'  or @type='gdouble') and @slider='true']">
+		/* container for <xsl:value-of select="@name"/> */
+		GtkWidget* <xsl:value-of select="generate-id(.)"/> = gtk_hbox_new (FALSE, 0);
+		gtk_widget_show (<xsl:value-of select="generate-id(.)"/>);
+		
+		/* label for <xsl:value-of select="@name"/> */
+		GtkWidget* <xsl:value-of select="concat('lbl',generate-id(.))"/> = gtk_label_new("<xsl:apply-templates select="." mode="label"/>");
+        ::gtk_widget_show (<xsl:value-of select="concat('lbl',generate-id(.))"/> );
+        ::gtk_box_pack_start (GTK_BOX (<xsl:value-of select="generate-id(.)"/>), <xsl:value-of select="concat('lbl',generate-id(.))"/> , FALSE, FALSE, 6);
+        ::gtk_label_set_justify (GTK_LABEL (<xsl:value-of select="concat('lbl',generate-id(.))"/> ), GTK_JUSTIFY_RIGHT);
+
+		/* tooltip for <xsl:value-of select="@name"/> */
+		GtkTooltips* <xsl:value-of select="concat('tooltip',generate-id(.))"/> = gtk_tooltips_new ();
+		gtk_tooltips_set_tip(
+			<xsl:value-of select="concat('tooltip',generate-id(.))"/>,
+			<xsl:value-of select="concat('lbl',generate-id(.))"/>,
+			"<xsl:apply-templates select="." mode="description"/>",
+			NULL);
+		
+		<xsl:if test="not(@min)">
+			<xsl:message terminate="yes">@min missing</xsl:message>
+		</xsl:if>
+		<xsl:if test="not(@max)">
+			<xsl:message terminate="yes">@max missing</xsl:message>
+		</xsl:if>
+		<xsl:if test="not(@default)">
+			<xsl:message terminate="yes">@default missing</xsl:message>
+		</xsl:if>
+		<xsl:if test="not(@step)">
+			<xsl:message terminate="yes">@step missing</xsl:message>
+		</xsl:if>
+		<xsl:if test="number(@min)&gt;number(@max)">
+			<xsl:message terminate="yes">min&gt;max</xsl:message>
+		</xsl:if>
+
+		/* adjustment for <xsl:value-of select="@name"/> */
+        GtkObject* <xsl:value-of select="concat('adj',generate-id(.))"/> = ::gtk_adjustment_new (
+        	(gdouble)<xsl:value-of select="@default"/>,/* value */
+        	(gdouble)<xsl:value-of select="@min"/>, /* min */
+        	(gdouble)<xsl:value-of select="@max"/>, /* max */
+        	(gdouble)<xsl:value-of select="@step"/>, /* step */
+        	<xsl:choose>
+        		<xsl:when test="@page">(gdouble)<xsl:value-of select="@page"/></xsl:when>
+        		<xsl:otherwise>(gdouble)((<xsl:value-of select="@max"/> - <xsl:value-of select="@min"/> )/100.0)</xsl:otherwise>
+        	</xsl:choose>, /* page */
+        	0 /* page size is always 0 */
+        	);
+
+
+        /* scale for <xsl:value-of select="@name"/> */
+        GtkWidget* <xsl:value-of select="concat('scale',generate-id(.))"/> = ::gtk_hscale_new(
+        	GTK_ADJUSTMENT(<xsl:value-of select="concat('adj',generate-id(.))"/>)
+        	);
+        ::gtk_scale_set_draw_value (GTK_SCALE( <xsl:value-of select="concat('scale',generate-id(.))"/>),TRUE);
+        ::gtk_widget_show (<xsl:value-of select="concat('scale',generate-id(.))"/>);
+        //:gtk_widget_set_size_request
+        
+        ::gtk_box_pack_start (
+        	GTK_BOX (<xsl:value-of select="generate-id(.)"/>),
+        	<xsl:value-of select="concat('scale',generate-id(.))"/>,
+        	TRUE, TRUE, 6
+        	);
+        
 
 		/* connect spin and adjustement */
         g_signal_connect (
@@ -321,7 +415,7 @@ gtk_widget_show(<xsl:value-of select="generate-id(.)"/>);
 	<xsl:when test="(@type='double' or @type='gdouble')">0.0</xsl:when>
 	<xsl:when test="(@type='float' or @type='gfloat') and @default">(gfloat)<xsl:value-of select="@default"/></xsl:when>
 	<xsl:when test="(@type='float' or @type='gfloat')">(gfloat)0.0</xsl:when>
-	<xsl:otherwise><xsl:message terminate="yes">boum <xsl:value-of select="@type"/></xsl:message></xsl:otherwise>
+	<xsl:otherwise><xsl:message terminate="yes">boum '<xsl:value-of select="@type"/>/<xsl:value-of select="@name"/>'</xsl:message></xsl:otherwise>
 </xsl:choose>
 <xsl:text>, /* </xsl:text>
 <xsl:value-of select="@name"/>

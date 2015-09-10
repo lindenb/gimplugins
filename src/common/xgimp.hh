@@ -227,6 +227,7 @@ class XDrawable:public XItem
 		
 	};
 
+#define CHECK_NOT_NULL do {if(this->nil()) LOG("preview is null!");} while(0)
 
 class XPreview
 	{
@@ -265,15 +266,18 @@ class XPreview
 			
 		void draw()
 			{
+			CHECK_NOT_NULL;
 			if(!nil()) ::gimp_preview_draw(preview());
 			}
 		void invalidate()
 			{
+			CHECK_NOT_NULL;
 			if(!nil()) ::gimp_preview_invalidate(preview());
 			}
 		
 		void get_position(gint* x,gint* y)
 			{
+			CHECK_NOT_NULL;
 			if(!nil()) gimp_preview_get_position (preview(),x,y);
 			}
 		
@@ -292,6 +296,7 @@ class XPreview
 		
 		void get_size(gint* w,gint* h)
 			{
+			CHECK_NOT_NULL;
 			if(!nil()) gimp_preview_get_size (preview(),w,h);
 			}
 		
@@ -313,7 +318,11 @@ class XPreview
       		}
       	void draw_region(const GimpPixelRgn *region)
       		{
-      		if(!nil()) ::gimp_drawable_preview_draw_region(GIMP_DRAWABLE_PREVIEW(preview()),region);
+      		CHECK_NOT_NULL;
+      		if(!nil())
+      			{
+      			::gimp_drawable_preview_draw_region(GIMP_DRAWABLE_PREVIEW(preview()),region);
+      			}
       		}
       
 	};
@@ -433,30 +442,11 @@ class XTileIterator1
 		gint y() const { return _src_rgn.y;}
 		gint height() const { return _src_rgn.h;}
 		gint width() const { return _src_rgn.w;}
-	private:
-		guchar* _at(GimpPixelRgn* base,gint y,gint x)
-			{
-			if(pr==NULL) return NULL;
-			guchar* s= base->data;
-			s+= (base->rowstride)*y;
-			s+= (base->bpp)*x;
-			return s;
-			}	
-	public:
-		guchar* src_at(gint y,gint x)
-			{
-			return _at(source(),y,x);
-			}
-		guchar* dest_at(gint y,gint x)
-			{
-			return _at(destination(),y,x);
-			}
-		
+
 		XCairo* cairo()
 			{
 			if( xcairo == 0 )
 				{
-				
 				cairo_surface_t* s= ::cairo_image_surface_create_for_data (
 					 _dest_rgn.data,
 				     CAIRO_FORMAT_ARGB32,
@@ -472,11 +462,11 @@ class XTileIterator1
 					}
 				
 			    this->xcairo = new XCairo(s);
-			    this->xcairo->translate(
-		             -(_dest_rgn.x),
-		             -(_dest_rgn.y)
-		             );
-			   
+			  
+				this->xcairo->translate(
+			         -((double)_dest_rgn.x),
+			         -((double)_dest_rgn.y)
+			         );
 				}
 			return xcairo;
 			}

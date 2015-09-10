@@ -4,7 +4,8 @@
 #include <iostream>
 
 
-#define DEBUG(a) do { std::cerr << "[" << __FILE__ << ":" << __LINE__ << "]" << a << std::endl;}while(0)
+#define DEBUG(a) do { std::cerr << "[DEBUG:" << __FILE__ << ":" << __LINE__ << "]" << a << std::endl;}while(0)
+#define LOG(a) do { std::cerr << "[DEBUG:" << __FILE__ << ":" << __LINE__ << "]" << a << std::endl;}while(0)
 
 #endif
 
