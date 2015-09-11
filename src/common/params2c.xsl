@@ -384,26 +384,82 @@ gtk_widget_show(<xsl:value-of select="generate-id(.)"/>);
 
 </xsl:template>
 
+
+<xsl:template match="label">
+  /* create label */
+  GtkWidget* <xsl:value-of select="generate-id(.)"/> = gtk_label_new("<xsl:choose>
+  	<xsl:when test="@label"><xsl:value-of select="@label"/></xsl:when>
+  	<xsl:otherwise><xsl:value-of select="text()"/></xsl:otherwise>
+  	</xsl:choose>");
+  gtk_widget_show (<xsl:value-of select="generate-id(.)"/>);
+</xsl:template>
+
+<xsl:template match="split">
+  <xsl:choose>
+    <xsl:when test="count(*) = 2">
+    	/* split pane; contains two children */
+    </xsl:when>
+    <xsl:otherwise>
+    	<xsl:message terminate="yes">split dont have two children</xsl:message>
+    </xsl:otherwise>
+  </xsl:choose>
+  /* create pane */
+  GtkWidget* <xsl:value-of select="generate-id(.)"/> = ::gtk_paned_new(<xsl:choose>
+  	<xsl:when test="@orient='vertical' or @orientation='vertical'">GTK_ORIENTATION_VERTICAL</xsl:when>
+  	<xsl:otherwise>GTK_ORIENTATION_HORIZONTAL</xsl:otherwise>
+  	</xsl:choose>);
+  gtk_widget_show (<xsl:value-of select="generate-id(.)"/>);
+  
+  <xsl:apply-templates select="*"/>
+  <xsl:for-each select="*">
+  ::gtk_paned_pack<xsl:value-of select="position()"/>(
+			GTK_PANED (<xsl:value-of select="generate-id(..)"/>),
+			<xsl:value-of select="generate-id(.)"/>,
+			TRUE,
+			FALSE
+			);
+  </xsl:for-each>
+  
+</xsl:template>
+
+
+<xsl:template match="tabbed|notebook">
+<xsl:variable name="notebookid"><xsl:value-of select="generate-id(.)"/></xsl:variable>
+
+GtkWidget* <xsl:value-of select="$notebookid"/> = ::gtk_notebook_new();
+::gtk_widget_show (<xsl:value-of select="$notebookid"/>);
+GtkWidget* <xsl:value-of select="concat('lbl',$notebookid)"/> = NULL;
+
+<xsl:for-each select="tab">
+  <xsl:choose>
+    <xsl:when test="count(*) = 1">
+    	/* TAB */
+    </xsl:when>
+    <xsl:otherwise>
+    	<xsl:message terminate="yes">tab doesn't have one child</xsl:message>
+    </xsl:otherwise>
+  </xsl:choose>
+
+<xsl:for-each select="*"> <!-- only one -->
+<xsl:value-of select="concat('lbl',$notebookid)"/> = ::gtk_label_new("<xsl:value-of select="../@label"/>");
+ <xsl:apply-templates select="."/>
+::gtk_notebook_append_page (
+	GTK_NOTEBOOK(<xsl:value-of select="$notebookid"/>),
+    <xsl:value-of select="generate-id(.)"/>,
+    <xsl:value-of select="concat('lbl',$notebookid)"/>
+    );
+</xsl:for-each>
+
+</xsl:for-each>
+
+</xsl:template>
+
+
 <xsl:template match="preview">
 //preview already created
 ::gtk_widget_show (<xsl:value-of select="generate-id(.)"/>);
 </xsl:template>
 
-
-<xsl:template match="*" mode="label">
-<xsl:choose>
-	<xsl:when test="not(@label)"><xsl:value-of select="@name"/></xsl:when>
-	<xsl:otherwise><xsl:value-of select="@label"/></xsl:otherwise>
-</xsl:choose>
-</xsl:template>
-
-
-<xsl:template match="*" mode="description">
-<xsl:choose>
-	<xsl:when test="not(@description)"><xsl:apply-templates select="." mode="label"/></xsl:when>
-	<xsl:otherwise><xsl:value-of select="@description"/></xsl:otherwise>
-</xsl:choose>
-</xsl:template>
 
 <xsl:template match="param" mode="instance">
 <xsl:choose>
