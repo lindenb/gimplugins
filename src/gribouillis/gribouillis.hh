@@ -1,8 +1,12 @@
+#include <vector>
 #include "gribouillis.tab.hh"
 #include "common/random.hh"
+#include "common/range.hh"
 #include "common/wiggle.hh"
+#include "common/trigonometry.hh"
 
 using namespace std;
+
 
 void gribouillis::run(XDrawable xdrawable,XPreview preview)
 {
@@ -24,7 +28,7 @@ void gribouillis::run(XDrawable xdrawable,XPreview preview)
 	}
   
   long seed=std::time(NULL);
-  long occurences = (long)((xdrawable.width()*xdrawable.height())*prefs()->proba);
+  long occurences = (long)(((x2-x1)*(y2-y1))*prefs()->proba);
   
   XTileIterator1 iter(xdrawable,preview);
   long n=0;
@@ -55,11 +59,44 @@ void gribouillis::run(XDrawable xdrawable,XPreview preview)
 		 		std::min(prefs()->minradius,prefs()->maxradius),
   				std::max(prefs()->minradius,prefs()->maxradius)
 		 		);
-
+		
 		 
 	  	ctx->gray(g,a);
-		ctx->circle( cx, cy, r );
-		ctx->fill();
+		if( prefs()->wiggle && r>0)
+			{
+			double angle = 0.0;
+			double shift_angle = rand.rnd(PI2);
+			bool first=true;
+			while(angle< PI2)
+				{
+				double radius  = abs(r + rand.sign() * rand.rnd(prefs()->precision));
+				if(radius<=0) radius=0.0001;
+				double px = cx + cos(angle + shift_angle)*radius;
+				double py = cy + sin(angle + shift_angle)*radius;
+				if(first)
+					{
+					ctx->move_to(px,py);
+					}
+				else
+					{
+					ctx->line_to(px,py);
+					}
+				double stroke_len= rand.rnd( prefs()->strokelen + rand.rnd(prefs()->precision));
+				if(stroke_len<=0) stroke_len=1;
+				
+				/* arc = angle * radius */
+				angle += (stroke_len / radius);
+				
+				first=false;
+				}
+			ctx->fill();
+			}
+		else
+			{
+			ctx->circle( cx, cy, r );
+			ctx->fill();
+			}
+		
 		if(!preview.nil())
 			{
 			preview.draw_region (iter.destination());

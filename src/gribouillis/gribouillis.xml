@@ -3,29 +3,36 @@
 	<vbox>
 	<preview/>
 	<notebook>
-	<tab label="hello">
-		<vbox>
-		<frame label="Propability">
+		<tab label="Bubbles">
 			<vbox>
-				<param name="proba" type="double" default="0.0001" label="Propability" min="0.0" max="1.0" step="0.0001"/>
+			<frame label="Propability">
+				<vbox>
+					<param name="proba" type="double" default="0.0001" label="Propability" min="0.0" max="1.0" step="0.0001"/>
+				</vbox>
+			</frame>
+			<frame label="Colors">
+				<vbox>
+					<param name="mingray" slider="true" type="double" default="0.01" label="Min. Gray" min="0.0" max="1.0" step="0.001"/>
+					<param name="maxgray" slider="true" type="double" default="1.0" label="Max. Gray" min="0.0" max="1.0" step="0.001"/>
+					<param name="minalpha" slider="true" type="double" default="0.0" label="Min. Alpha" min="0.0" max="1.0" step="0.001"/>
+					<param name="maxalpha" slider="true" type="double" default="1.0" label="Max. Alpha" min="0.0" max="1.0" step="0.001"/>
+				</vbox>
+			</frame>
+			<frame label="Sizes">
+				<vbox>
+					<param name="minradius" type="double" default="0.01" label="Min. Radius" min="0.0" max="100000" step="1"/>
+					<param name="maxradius" type="double" default="50" label="Max. Radius" min="0.0" max="100000" step="1"/>
+				</vbox>
+			</frame>
 			</vbox>
-		</frame>
-		<frame label="Colors">
+		</tab>
+		<tab label="Wiggle">
 			<vbox>
-				<param name="mingray" slider="true" type="double" default="0.01" label="Min. Gray" min="0.0" max="1.0" step="0.001"/>
-				<param name="maxgray" slider="true" type="double" default="1.0" label="Max. Gray" min="0.0" max="1.0" step="0.001"/>
-				<param name="minalpha" slider="true" type="double" default="0.0" label="Min. Alpha" min="0.0" max="1.0" step="0.001"/>
-				<param name="maxalpha" slider="true" type="double" default="1.0" label="Max. Alpha" min="0.0" max="1.0" step="0.001"/>
+				<param name="wiggle" type="bool" default="true" label="Use Wiggle rendering"/>
+				<param name="strokelen" slider="true" type="double" default="50" label="Stroke Length" min="0.0" max="100000" step="1"/>
+				<param name="precision" slider="true" type="double" default="5" label="Precision" min="1.0" max="100000" step="1"/>
 			</vbox>
-		</frame>
-		<frame label="Sizes">
-			<vbox>
-				<param name="minradius" type="double" default="0.01" label="Min. Radius" min="0.0" max="100000" step="1"/>
-				<param name="maxradius" type="double" default="50" label="Max. Radius" min="0.0" max="100000" step="1"/>
-			</vbox>
-		</frame>
-		</vbox>
-	</tab>
+		</tab>
 	</notebook>
 	</vbox>
 </plugin>

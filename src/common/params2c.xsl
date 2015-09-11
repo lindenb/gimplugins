@@ -354,23 +354,26 @@ gtk_widget_show(<xsl:value-of select="generate-id(.)"/>);
 <xsl:template match="param[@type='boolean' or @type='bool']">
 
 		  GtkWidget* <xsl:value-of select="generate-id(.)"/> = gtk_check_button_new_with_label("<xsl:apply-templates select="." mode="label"/>");
-		  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (<xsl:value-of select="generate-id(.)"/>), <xsl:value-of select="$pluginname"/>vals.<xsl:value-of select="@name"/>);
-		  gtk_widget_show (<xsl:value-of select="generate-id(.)"/>);
+		  ::gtk_toggle_button_set_active (
+		  	GTK_TOGGLE_BUTTON (<xsl:value-of select="generate-id(.)"/>),
+		  	prefs()-><xsl:value-of select="@name"/>
+		  	);
+		  ::gtk_widget_show (<xsl:value-of select="generate-id(.)"/>);
 
 		  g_signal_connect (
 		  	<xsl:value-of select="generate-id(.)"/>,
 		  	"toggled",
 			G_CALLBACK (gimp_toggle_button_update),
-			 &amp;(<xsl:value-of select="$pluginname"/>vals.<xsl:value-of select="@name"/>)
+			 &amp;(<xsl:value-of select="$pluginname"/>::PREFS.<xsl:value-of select="@name"/>)
 			 );
 		if(preview != NULL)
 			{
-		  g_signal_connect_swapped (
-		  	<xsl:value-of select="generate-id(.)"/>,
-		  	"toggled",
-			 G_CALLBACK (gimp_preview_invalidate),
-			 preview
-			 );
+			::g_signal_connect_swapped (
+			  	<xsl:value-of select="generate-id(.)"/>,
+			  	"toggled",
+				 G_CALLBACK (gimp_preview_invalidate),
+				 preview
+				 );
 			}
 		
 		/* tooltip for <xsl:value-of select="@name"/> */
