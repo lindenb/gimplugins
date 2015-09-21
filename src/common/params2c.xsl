@@ -6,12 +6,12 @@
 <xsl:variable name="instanceclass">
 	<xsl:choose>
 		<xsl:when test="/plugin/@instanceclass"><xsl:value-of select="/plugin/@instanceclass"/></xsl:when>
-		<xsl:otherwise><xsl:value-of select="$pluginname"/></xsl:otherwise>
+		<xsl:otherwise><xsl:value-of select="$basepluginname"/></xsl:otherwise>
 	</xsl:choose>
 </xsl:variable>
 
 <xsl:template match="/">
-#include "<xsl:value-of select="$pluginname"/>.hh"
+#include "<xsl:value-of select="$basepluginname"/>.hh"
 
 <xsl:apply-templates select="plugin"/>
 

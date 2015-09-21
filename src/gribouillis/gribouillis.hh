@@ -7,6 +7,15 @@
 
 using namespace std;
 
+class gribouillis:public abstract_gribouillis
+	{ 
+	public:
+		Random rand;
+		gribouillis() {}
+		virtual ~gribouillis() {}
+		virtual void  run(XDrawable xdrawable,XPreview preview);
+	};
+
 
 void gribouillis::run(XDrawable xdrawable,XPreview preview)
 {
@@ -34,7 +43,7 @@ void gribouillis::run(XDrawable xdrawable,XPreview preview)
   long n=0;
   while(iter.ok())
   	{
-  	Random rand(seed);
+  	rand.reset(seed);
 
 
   	XCairo* ctx = iter.cairo();

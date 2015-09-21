@@ -1,13 +1,18 @@
 .PHONY:all clean install
 GIMPTOOL?=gimptool-2.0
 SRCNAME=gribouillis
+TESTNAME=$(addprefix test,${SRCNAME})
 CFLAGS=-I..
-all:${SRCNAME}
+all:${SRCNAME} ${TESTNAME}
 
-install: ${SRCNAME}
+install: ${SRCNAME} 
 	$(GIMPTOOL) --install-bin $<
 
-
+${TESTNAME}: 
+	xsltproc --output $(addsuffix .cpp,$@)   ../common/params2test.xsl $(addsuffix .xml,${SRCNAME})
+	g++ -g -o $@ -I.. -Wall `$(GIMPTOOL) --cflags `  $(addsuffix .cpp,$@) -lcairo
+	#rm $(addsuffix .cpp,$@)
+	
 ${SRCNAME} : $(addprefix ${SRCNAME},.tab.cpp .tab.hh .hh)
 	g++ -g -o $@ -I.. -Wall  $< `$(GIMPTOOL) --cflags --libs` 
 
