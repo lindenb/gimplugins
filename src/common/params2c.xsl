@@ -76,6 +76,22 @@ static void <xsl:value-of select="$pluginname"/>_run (
 };
 
 #ifdef STANDALONE
+
+void <xsl:value-of select="$pluginname"/>::usage(std::ostream&amp; out)
+	{
+	out &lt;&lt; "Compilation: " &lt;&lt; __DATE__ &lt;&lt; __TIME__ &lt;&lt; std::endl;
+	out &lt;&lt; "Options: " &lt;&lt; std::endl;
+	out &lt;&lt; "  -h help, this screen" &lt;&lt; std::endl;
+	out &lt;&lt; "  -v version" &lt;&lt; std::endl;
+	out &lt;&lt; "  -W (int) image width" &lt;&lt; std::endl;
+	out &lt;&lt; "  -H (int) image height" &lt;&lt; std::endl;	
+	<xsl:for-each select="//param">
+    out &lt;&lt; "  --<xsl:value-of select="@name"/>" &lt;&lt; std::endl;	
+    </xsl:for-each>
+	out &lt;&lt; std::endl;
+	}
+
+
 int <xsl:value-of select="$pluginname"/>::main(int argc,char** argv)
 	{
            int c;
@@ -130,14 +146,19 @@ int <xsl:value-of select="$pluginname"/>::main(int argc,char** argv)
                			}
                		</xsl:for-each>
                    break;
-               case 'a':
-                   printf("option a\n");
+               case 'W':
                    break;
-
-               case 'b':
-                   printf("option b\n");
+               case 'H':
                    break;
-				}	
+               case 'v':
+                    std::cout &lt;&lt; "VERSION" &lt;&lt; std::endl;
+                    return EXIT_SUCCESS;
+               		break;
+               case 'h':
+                    usage(std::cout);
+                    return EXIT_SUCCESS;
+               		break;
+			   }	
 			}
 	return EXIT_SUCCESS;
 	}

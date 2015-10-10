@@ -58,6 +58,7 @@ class <xsl:value-of select="$pluginname"/> : public <xsl:choose>
 		virtual gboolean dialog(XDrawable drawable);
 		virtual void run (XDrawable drawable, XPreview preview)=0;
 		#else
+		virtual void usage(std::ostream&amp; out);
 		int main(int argc,char** argv);
 		#endif
 		

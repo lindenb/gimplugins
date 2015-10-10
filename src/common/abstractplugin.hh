@@ -1,6 +1,9 @@
 #ifndef ABSTRACT_PLUGIN_HH
 #define ABSTRACT_PLUGIN_HH
 #include "common/xgimp.hh"
+#ifdef STANDALONE
+#include <iostream>
+#endif
 
 
 
@@ -139,7 +142,8 @@ class AbstractPlugin
 				}
 			 }
 		}
-		
+		#else
+		virtual void usage(std::ostream& out)=0;
 		#endif
 		
 		virtual const char* name() const=0;
