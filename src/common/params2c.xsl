@@ -11,6 +11,10 @@
 </xsl:variable>
 
 <xsl:template match="/">
+#ifdef STANDALONE
+#include &lt;unistd.h&gt;
+#include &lt;getopt.h&gt;
+#endif
 #include "<xsl:value-of select="$basepluginname"/>.hh"
 
 <xsl:apply-templates select="plugin"/>
@@ -20,7 +24,7 @@
 <xsl:template match="plugin">
 
 
-
+#ifndef STANDALONE
 
 static void <xsl:value-of select="$pluginname"/>_query (void) {
   static GimpParamDef args[] = {
@@ -57,16 +61,94 @@ static void <xsl:value-of select="$pluginname"/>_run (
 	instance.run1(name,nparams,param,nreturn_vals,return_vals);
 	}
 
-
+#endif
 
 
 <xsl:value-of select="$pluginname"/>Vals
 <xsl:value-of select="$pluginname"/>::PREFS={
 <xsl:apply-templates select="//param" mode="instance"/>
+#ifdef STANDALONE
+1000, /* width */
+1000  /* height */
+#else
 1 /* preview */
+#endif
 };
 
+#ifdef STANDALONE
+int <xsl:value-of select="$pluginname"/>::main(int argc,char** argv)
+	{
+           int c;
 
+           while (1) {
+               //int this_option_optind = optind ? optind : 1;
+               int option_index = 0;
+               static struct option long_options[] = {
+               	   {"help",     no_argument, 0,  'h' },
+               	   {"version",     no_argument, 0,  'v' },
+                   {"width",     required_argument, 0,  'W' },
+                   {"height",     required_argument, 0,  'H' },
+                   {"output",     required_argument, 0,  'o' }<xsl:for-each select="//param">,
+                   {"<xsl:value-of select="@name"/>",<xsl:choose>
+                   		<xsl:when test="@type='bool'">no_argument</xsl:when>
+                   		<xsl:otherwise>required_argument</xsl:otherwise>
+                   	</xsl:choose>,0,0}</xsl:for-each>,
+                   {0,         0,                 0,  0 }
+               		};
+               c = getopt_long(argc, argv, "W:H:o:vh", long_options, &amp;option_index);
+               if (c == -1) break;
+               switch (c) {
+               case 0:
+               		<xsl:for-each select="//param">
+               		if( strcmp("<xsl:value-of select="@name"/>" , long_options[option_index].name ) == 0)
+               			{
+               			<xsl:choose>
+                   		<xsl:when test="@type='bool'">
+                   		prefs()-><xsl:value-of select="@name"/> = !<xsl:value-of select="@default"/>;
+                   		</xsl:when>
+                   		<xsl:when test="@type='double'">
+                   		char* p2;
+                   		double d = strtod(optarg,&amp;p2); 
+                   		<xsl:if test="@min">
+                   		if(d &lt; <xsl:value-of select="@min"/>)
+                   			{
+                   			cerr &lt;&lt; "<xsl:value-of select="@name"/> should be &gt;=  <xsl:value-of select="@min"/> " &lt;&lt; endl;
+                   			return EXIT_FAILURE;
+                   			}
+                   		</xsl:if>
+                   		<xsl:if test="@max">
+                   		if(d &gt; <xsl:value-of select="@max"/>)
+                   			{
+                   			cerr &lt;&lt; "<xsl:value-of select="@name"/> should be &lt;=  <xsl:value-of select="@max"/> " &lt;&lt; endl;
+                   			return EXIT_FAILURE;
+                   			}
+                   		</xsl:if>
+                   		prefs()-><xsl:value-of select="@name"/> = d;
+                   		</xsl:when>
+                   		<xsl:otherwise><xsl:message terminate="yes">getopt:<xsl:value-of select="@type"/></xsl:message></xsl:otherwise>
+                   		</xsl:choose>
+               			}
+               		</xsl:for-each>
+                   break;
+               case 'a':
+                   printf("option a\n");
+                   break;
+
+               case 'b':
+                   printf("option b\n");
+                   break;
+				}	
+			}
+	return EXIT_SUCCESS;
+	}
+
+int main(int argc,char** argv)
+	{
+	<xsl:value-of select="$pluginname"/> app;
+	return app.main(argc,argv);
+	}
+
+#endif
 
 
 <xsl:value-of select="$pluginname"/>Vals* <xsl:value-of select="$pluginname"/>::prefs()
@@ -74,12 +156,13 @@ static void <xsl:value-of select="$pluginname"/>_run (
 	return &amp;(<xsl:value-of select="$pluginname"/>::PREFS);
 	}
 
+
 const char* <xsl:value-of select="$pluginname"/>::name() const
 	{
 	return "<xsl:value-of select="$pluginname"/>";
 	}
 
-
+#ifndef STANDALONE
 static void _preview_callback(GimpDrawable *drawable, GimpPreview  *preview)
 	{
 	if(drawable==NULL) return;
@@ -136,7 +219,6 @@ gboolean <xsl:value-of select="$pluginname"/>::dialog(XDrawable drawable	)
     ::gtk_widget_destroy (dialog);
 	return run;
 	}
-	
 
 GimpPlugInInfo PLUG_IN_INFO = {
 	(GimpInitProc)NULL,
@@ -148,6 +230,7 @@ GimpPlugInInfo PLUG_IN_INFO = {
 
 MAIN ()
 
+#endif
 </xsl:template>
 
 <xsl:template match="frame">

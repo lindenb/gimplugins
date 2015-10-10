@@ -29,7 +29,12 @@
 typedef struct <xsl:value-of select="$pluginname"/>Vals_t
 	{
 	<xsl:apply-templates select="//param" mode="field"/>
+#ifdef STANDALONE
+	gint image_width;
+	gint image_height;
+#else
 	gboolean preview;
+#endif
 	} <xsl:value-of select="$pluginname"/>Vals;
 
 /** abstract plugin class */
@@ -48,9 +53,13 @@ class <xsl:value-of select="$pluginname"/> : public <xsl:choose>
 			}
 		virtual <xsl:value-of select="$pluginname"/>Vals* prefs();
 		virtual const char* name() const;
+		
+		#ifndef STANDALONE
 		virtual gboolean dialog(XDrawable drawable);
 		virtual void run (XDrawable drawable, XPreview preview)=0;
-		
+		#else
+		int main(int argc,char** argv);
+		#endif
 		
 		
 	};

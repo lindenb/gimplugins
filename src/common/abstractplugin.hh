@@ -15,6 +15,8 @@ class AbstractPlugin
 		virtual ~AbstractPlugin()
 			{
 			}
+		#ifndef STANDALONE
+		
 		virtual void run(XDrawable drawable,XPreview preview)=0;
 		
 		
@@ -23,11 +25,7 @@ class AbstractPlugin
 			XPreview preview;
 			this->run(drawable,preview);
 			}
-		
-		
-		virtual const char* name() const=0;
 		virtual gboolean dialog(XDrawable drawable)=0;
-		virtual T* prefs()=0;
 		
 		virtual gboolean has_dialog()
 			{
@@ -44,6 +42,9 @@ class AbstractPlugin
 				}
 			return FALSE;
 			}
+		
+		
+		
 		
 		virtual void run1(
 			 gchar   *name,
@@ -138,6 +139,11 @@ class AbstractPlugin
 				}
 			 }
 		}
+		
+		#endif
+		
+		virtual const char* name() const=0;
+		virtual T* prefs()=0;
 		
 	};
 

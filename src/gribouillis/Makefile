@@ -1,21 +1,18 @@
 .PHONY:all clean install
 GIMPTOOL?=gimptool-2.0
 SRCNAME=gribouillis
-TESTNAME=$(addprefix test,${SRCNAME})
+CMD_PREFIX=cmd_
+STANDALONE=$(addprefix ${CMD_PREFIX},${SRCNAME})
 CFLAGS=-I..
-all:${SRCNAME} ${TESTNAME}
+all:${SRCNAME} ${STANDALONE}
 
-install: ${SRCNAME} 
+install: ${SRCNAME} ${STANDALONE} 
 	$(GIMPTOOL) --install-bin $<
 
-${TESTNAME}: 
-	xsltproc --output $(addsuffix .cpp,$@)   ../common/params2test.xsl $(addsuffix .xml,${SRCNAME})
-	g++ -g -o $@ -I.. -Wall `$(GIMPTOOL) --cflags `  $(addsuffix .cpp,$@) -lcairo
-	#rm $(addsuffix .cpp,$@)
-	
-${SRCNAME} : $(addprefix ${SRCNAME},.tab.cpp .tab.hh .hh)
-	g++ -g -o $@ -I.. -Wall  $< `$(GIMPTOOL) --cflags --libs` 
 
+	
+${SRCNAME} ${STANDALONE}: $(addprefix ${SRCNAME},.tab.cpp .tab.hh .hh)
+	g++ -g -o $@ -I.. -Wall $(if $(findstring ${CMD_PREFIX},$@),-DSTANDALONE=1,) $< `$(GIMPTOOL) --cflags --libs` 
 
 $(addsuffix .tab.cpp,${SRCNAME}) :  ../common/params2c.xsl $(addsuffix .xml,${SRCNAME})
 	xsltproc --output $@ $^ 

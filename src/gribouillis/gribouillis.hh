@@ -13,10 +13,13 @@ class gribouillis:public abstract_gribouillis
 		Random rand;
 		gribouillis() {}
 		virtual ~gribouillis() {}
+		#ifndef STANDALONE
 		virtual void  run(XDrawable xdrawable,XPreview preview);
+		#endif
 	};
 
 
+#ifndef STANDALONE
 void gribouillis::run(XDrawable xdrawable,XPreview preview)
 {
  
@@ -125,5 +128,6 @@ void gribouillis::run(XDrawable xdrawable,XPreview preview)
 	  xdrawable.update(x1, y1, (x2 - x1), (y2 - y1));
 	  }
 	}
+#endif
 
 
