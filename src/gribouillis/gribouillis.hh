@@ -1,6 +1,5 @@
 #include <vector>
 #include "gribouillis.tab.hh"
-#include "common/random.hh"
 #include "common/range.hh"
 #include "common/wiggle.hh"
 #include "common/trigonometry.hh"
@@ -10,46 +9,18 @@ using namespace std;
 class gribouillis:public abstract_gribouillis
 	{ 
 	public:
-		Random rand;
+		
 		gribouillis() {}
 		virtual ~gribouillis() {}
-		#ifndef STANDALONE
-		virtual void  run(XDrawable xdrawable,XPreview preview);
-		#endif
+		virtual void  paint(XCairo* ctx,gint image_width,gint image_height);
 	};
 
 
-#ifndef STANDALONE
-void gribouillis::run(XDrawable xdrawable,XPreview preview)
+void gribouillis::paint(XCairo* ctx,gint image_width,gint image_height)
 {
+
+  long occurences = (long)(((image_width)*(image_height))*prefs()->proba);
  
-  gint    x1, y1, x2, y2;
-	
- if (!preview.nil())
-  	{
-  	x1 = preview.x();
-  	y1 = preview.y();
-  	x2 = x1 + preview.width();
-    y2 = y1 + preview.height();
-  	}
-  else
-  	{
-    /* Get selection area */
-    xdrawable.mask_bounds( &x1, &y1, &x2, &y2);
-   
-	}
-  
-  long seed=std::time(NULL);
-  long occurences = (long)(((x2-x1)*(y2-y1))*prefs()->proba);
-  
-  XTileIterator1 iter(xdrawable,preview);
-  long n=0;
-  while(iter.ok())
-  	{
-  	rand.reset(seed);
-
-
-  	XCairo* ctx = iter.cairo();
 	
   	for(long i=0;i< occurences;++i)
   		{
@@ -65,8 +36,8 @@ void gribouillis::run(XDrawable xdrawable,XPreview preview)
   			)
   			;
 
-  		 double cx= rand.rnd(x2-x1);
-  		 double cy= rand.rnd(y2-y1);
+  		 double cx= rand.rnd( image_width);
+  		 double cy= rand.rnd( image_height);
   		 double r = rand.rnd(
 		 		std::min(prefs()->minradius,prefs()->maxradius),
   				std::max(prefs()->minradius,prefs()->maxradius)
@@ -109,25 +80,13 @@ void gribouillis::run(XDrawable xdrawable,XPreview preview)
 			ctx->fill();
 			}
 		
-		if(!preview.nil())
-			{
-			preview.draw_region (iter.destination());
-			}
-		++n;
 		}
-
-	
-	
-  	++iter;
-    }
-  if (preview.nil())
-  	  {
-	  /*  update the region  */
-	  xdrawable.flush();
-	  xdrawable.merge_shadow(TRUE);
-	  xdrawable.update(x1, y1, (x2 - x1), (y2 - y1));
-	  }
+	}
+#ifdef STANDALONE
+int main(int argc,char** argv)
+	{
+	gribouillis app;
+	return app.main(argc,argv);
 	}
 #endif
-
 

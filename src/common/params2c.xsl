@@ -94,6 +94,7 @@ void <xsl:value-of select="$pluginname"/>::usage(std::ostream&amp; out)
 
 int <xsl:value-of select="$pluginname"/>::main(int argc,char** argv)
 	{
+	char* save_as_filename = NULL;
            int c;
 
            while (1) {
@@ -147,9 +148,24 @@ int <xsl:value-of select="$pluginname"/>::main(int argc,char** argv)
                		</xsl:for-each>
                    break;
                case 'W':
+               		prefs()->image_width = atoi(optarg);
+					if( prefs()->image_width &lt;=0 )
+						{
+						 std::cerr &lt;&lt; "bad width" &lt;&lt; std::endl;
+						 return EXIT_FAILURE;
+						}
                    break;
                case 'H':
+               		prefs()->image_height = atoi(optarg);
+					if( prefs()->image_height &lt;=0 )
+						{
+						 std::cerr &lt;&lt; "bad height" &lt;&lt; std::endl;
+						 return EXIT_FAILURE;
+						}
                    break;
+               case 'o':
+               		save_as_filename = optarg;
+               		break;
                case 'v':
                     std::cout &lt;&lt; "VERSION" &lt;&lt; std::endl;
                     return EXIT_SUCCESS;
@@ -160,14 +176,19 @@ int <xsl:value-of select="$pluginname"/>::main(int argc,char** argv)
                		break;
 			   }	
 			}
+	if( save_as_filename == NULL)
+		{
+		 std::cerr &lt;&lt; "undefined filename" &lt;&lt; std::endl;
+		 return EXIT_FAILURE;
+		}
+	
+	XCairo xcairo(prefs()->image_width,prefs()->image_height);
+	paint(&amp;xcairo,prefs()->image_width,prefs()->image_height);
+	xcairo.png(save_as_filename);
 	return EXIT_SUCCESS;
 	}
 
-int main(int argc,char** argv)
-	{
-	<xsl:value-of select="$pluginname"/> app;
-	return app.main(argc,argv);
-	}
+
 
 #endif
 

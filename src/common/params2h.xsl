@@ -11,10 +11,13 @@
 #define __<xsl:value-of select="$pluginname"/>_HEADER_
 /** BEGIN : AUTO GENERATED CODE **/
 
+
 #include &lt;libgimp/gimp.h&gt;
 #include &lt;libgimp/gimpui.h&gt;
 #include &lt;libgimpwidgets/gimpwidgets.h&gt;
 #include "common/abstractplugin.hh"
+
+
 
 <xsl:apply-templates select="plugin"/>
 
@@ -40,7 +43,7 @@ typedef struct <xsl:value-of select="$pluginname"/>Vals_t
 /** abstract plugin class */
 class <xsl:value-of select="$pluginname"/> : public <xsl:choose>
 		<xsl:when test="@extend"><xsl:value-of select="@extend"/></xsl:when>
-		<xsl:otherwise>AbstractPlugin&lt;<xsl:value-of select="$pluginname"/>Vals&gt;</xsl:otherwise>
+		<xsl:otherwise>AbstractCairoPlugin&lt;<xsl:value-of select="$pluginname"/>Vals&gt;</xsl:otherwise>
 	</xsl:choose>
 	{
 	public:
@@ -53,10 +56,9 @@ class <xsl:value-of select="$pluginname"/> : public <xsl:choose>
 			}
 		virtual <xsl:value-of select="$pluginname"/>Vals* prefs();
 		virtual const char* name() const;
-		
+		virtual void paint(XCairo* cairo,gint width,gint height)=0;
 		#ifndef STANDALONE
 		virtual gboolean dialog(XDrawable drawable);
-		virtual void run (XDrawable drawable, XPreview preview)=0;
 		#else
 		virtual void usage(std::ostream&amp; out);
 		int main(int argc,char** argv);

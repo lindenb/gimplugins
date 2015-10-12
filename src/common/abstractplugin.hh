@@ -1,6 +1,8 @@
 #ifndef ABSTRACT_PLUGIN_HH
 #define ABSTRACT_PLUGIN_HH
 #include "common/xgimp.hh"
+#include "common/xcairo.hh"
+#include "common/random.hh"
 #ifdef STANDALONE
 #include <iostream>
 #endif
@@ -150,5 +152,69 @@ class AbstractPlugin
 		virtual T* prefs()=0;
 		
 	};
+
+
+template<typename T>
+class AbstractCairoPlugin: public AbstractPlugin<T>
+	{
+	public:
+		Random rand;
+		AbstractCairoPlugin()
+			{
+			}
+		virtual ~AbstractCairoPlugin()
+			{
+			}
+
+		virtual void paint(XCairo* ctx,gint image_width,gint image_height)=0;
+		
+		virtual void run(XDrawable xdrawable,XPreview preview)
+			{
+			 
+			  gint    x1, y1, x2, y2;
+	
+			 if (!preview.nil())
+			  	{
+			  	x1 = preview.x();
+			  	y1 = preview.y();
+			  	x2 = x1 + preview.width();
+				y2 = y1 + preview.height();
+			  	}
+			  else
+			  	{
+				/* Get selection area */
+				xdrawable.mask_bounds( &x1, &y1, &x2, &y2);
+			   
+				}
+			  
+			  long seed=std::time(NULL);
+
+			  
+			  XTileIterator1 iter(xdrawable,preview);
+				
+			  while(iter.ok())
+			  	{
+			  	rand.reset(seed);
+
+
+			  	XCairo* ctx = iter.cairo();
+				paint(ctx,(x2-x1),(y2-y1));
+				
+				if(!preview.nil())
+					{
+					preview.draw_region (iter.destination());
+					}
+			  	++iter;
+				}
+			  if (preview.nil())
+			  	  {
+				  /*  update the region  */
+				  xdrawable.flush();
+				  xdrawable.merge_shadow(TRUE);
+				  xdrawable.update(x1, y1, (x2 - x1), (y2 - y1));
+				  }
+			}
+	};
+
 
 #endif
