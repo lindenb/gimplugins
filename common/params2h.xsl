@@ -27,18 +27,19 @@
 
 <xsl:template match="plugin">
 
-
-/** structure holding preferences */
-typedef struct <xsl:value-of select="$pluginparam"/>
+/** structure <xsl:value-of select="$pluginparam"/> holding preferences */
+class <xsl:value-of select="$pluginparam"/>
 	{
+	public:
 	<xsl:apply-templates select="//param" mode="field"/>
 #ifdef STANDALONE
-	gint image_width;
-	gint image_height;
+		gint image_width;
+		gint image_height;
 #else
-	gboolean preview;
+		gboolean preview;
 #endif
-	} <xsl:value-of select="$pluginparam"/>Vals;
+		<xsl:value-of select="$pluginparam"/>();
+	};
 
 /** abstract plugin class */
 class <xsl:value-of select="$abstractpluginname"/> : public <xsl:choose>

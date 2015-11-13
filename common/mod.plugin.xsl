@@ -31,7 +31,7 @@
 </xsl:template>
 
 <xsl:template match="param" mode="field">
-/* <xsl:apply-templates select="." mode="label"/> : <xsl:apply-templates select="." mode="description"/> */
+	/* <xsl:apply-templates select="." mode="label"/> : <xsl:apply-templates select="." mode="description"/> */
 	<xsl:choose>
 		<xsl:when test="@type='int' or @type='gint'">gint</xsl:when>
 		<xsl:when test="@type='bool' or @type='boolean'">gboolean</xsl:when>

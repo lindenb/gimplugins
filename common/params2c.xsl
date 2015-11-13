@@ -63,18 +63,21 @@ static void <xsl:value-of select="$pluginname"/>_run (
 
 #endif
 
+/**  constructor for <xsl:value-of select="$pluginparam"/> */
+<xsl:value-of select="$pluginparam"/>::<xsl:value-of select="$pluginparam"/>()
+	{
+	<xsl:apply-templates select="//param" mode="instance"/>
+	#ifdef STANDALONE
+	image_width = 1000; /* width */
+	image_height = 1000;  /* height */
+	#else
+	preview= 1;/* preview */
+	#endif
+	}
 
 <xsl:value-of select="$pluginparam"/>
 <xsl:text> </xsl:text>
-<xsl:value-of select="$abstractpluginname"/>::PREFS={
-<xsl:apply-templates select="//param" mode="instance"/>
-#ifdef STANDALONE
-1000, /* width */
-1000  /* height */
-#else
-1 /* preview */
-#endif
-};
+<xsl:value-of select="$abstractpluginname"/>::PREFS;
 
 #ifdef STANDALONE
 
@@ -591,6 +594,9 @@ GtkWidget* <xsl:value-of select="concat('lbl',$notebookid)"/> = NULL;
 
 
 <xsl:template match="param" mode="instance">
+<xsl:text>		this-></xsl:text>
+<xsl:value-of select="@name"/>
+<xsl:text> = </xsl:text>
 <xsl:choose>
 	<xsl:when test="@type='int' and @default"><xsl:value-of select="@default"/></xsl:when>
 	<xsl:when test="@type='int'">0</xsl:when>
@@ -600,11 +606,9 @@ GtkWidget* <xsl:value-of select="concat('lbl',$notebookid)"/> = NULL;
 	<xsl:when test="(@type='double' or @type='gdouble')">0.0</xsl:when>
 	<xsl:when test="(@type='float' or @type='gfloat') and @default">(gfloat)<xsl:value-of select="@default"/></xsl:when>
 	<xsl:when test="(@type='float' or @type='gfloat')">(gfloat)0.0</xsl:when>
-	<xsl:otherwise><xsl:message terminate="yes">boum '<xsl:value-of select="@type"/>/<xsl:value-of select="@name"/>'</xsl:message></xsl:otherwise>
+	<xsl:otherwise><xsl:message terminate="yes">param:instance boum '<xsl:value-of select="@type"/>/<xsl:value-of select="@name"/>'</xsl:message></xsl:otherwise>
 </xsl:choose>
-<xsl:text>, /* </xsl:text>
-<xsl:value-of select="@name"/>
-<xsl:text> */
+<xsl:text>;
 </xsl:text>
 
 </xsl:template>
