@@ -1,26 +1,29 @@
 .PHONY:all clean install
 GIMPTOOL?=gimptool-2.0
-SRCNAME=gribouillis
+COMMANDS=gribouillis
 CMD_PREFIX=cmd_
-STANDALONE=$(addprefix ${CMD_PREFIX},${SRCNAME})
 CFLAGS=-I..
 COMMDIR=./common/
 
-all:${SRCNAME} ${STANDALONE}
+define compile
 
-install: ${SRCNAME} ${STANDALONE} 
-	$(GIMPTOOL) --install-bin $<
+$(1) $(addprefix ${CMD_PREFIX},$(1)): $$(addprefix $(1),.tab.cpp .tab.hh .hh)
+	g++ -g -o $$@ -I. -Wall $$(if $$(findstring $${CMD_PREFIX},$$@),-DSTANDALONE=1,) $$< `$$(GIMPTOOL) --cflags --libs` 
 
+$$(addsuffix .tab.cpp,$(1)) :  $${COMMDIR}/params2c.xsl $$(addsuffix .xml,$(1))
+	xsltproc --output $$@ $$^ 
 
-	
-${SRCNAME} ${STANDALONE}: $(addprefix ${SRCNAME},.tab.cpp .tab.hh .hh)
-	g++ -g -o $@ -I. -Wall $(if $(findstring ${CMD_PREFIX},$@),-DSTANDALONE=1,) $< `$(GIMPTOOL) --cflags --libs` 
+$$(addsuffix .tab.hh,$(1)) :  $${COMMDIR}/params2h.xsl $$(addsuffix .xml,$(1))
+	xsltproc --output $$@ $$^ 
 
-$(addsuffix .tab.cpp,${SRCNAME}) :  ${COMMDIR}/params2c.xsl $(addsuffix .xml,${SRCNAME})
-	xsltproc --output $@ $^ 
+endef
 
-$(addsuffix .tab.hh,${SRCNAME}) :  ${COMMDIR}/params2h.xsl $(addsuffix .xml,${SRCNAME})
-	xsltproc --output $@ $^ 
+all:${COMMANDS} $(addprefix ${CMD_PREFIX},${COMMANDS})
+
+install: all
+	$(foreach A,${COMMANDS}, $(GIMPTOOL) --install-bin ${A} ;)
+
+$(eval $(foreach A,${COMMANDS},$(call compile,${A})))
 
 clean:
 	rm -f ${SRCNAME} *.o $(addprefix ${SRCNAME},.tab.cpp .tab.hh)
