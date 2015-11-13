@@ -87,8 +87,9 @@ void <xsl:value-of select="$abstractpluginname"/>::usage(std::ostream&amp; out)
 	out &lt;&lt; "Options: " &lt;&lt; std::endl;
 	out &lt;&lt; "  -h help, this screen" &lt;&lt; std::endl;
 	out &lt;&lt; "  -v version" &lt;&lt; std::endl;
-	out &lt;&lt; "  -W (int) image width" &lt;&lt; std::endl;
-	out &lt;&lt; "  -H (int) image height" &lt;&lt; std::endl;	
+	out &lt;&lt; "  -W|--width (int) image width" &lt;&lt; std::endl;
+	out &lt;&lt; "  -H|--height (int) image height" &lt;&lt; std::endl;	
+	out &lt;&lt; "  -o|--output (filename) output file. REQUIRED" &lt;&lt; std::endl;	
 	<xsl:for-each select="//param">
     out &lt;&lt; "  --<xsl:value-of select="@name"/>" &lt;&lt; std::endl;	
     </xsl:for-each>

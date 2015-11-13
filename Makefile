@@ -1,4 +1,4 @@
-.PHONY:all clean install
+.PHONY:all clean install test
 GIMPTOOL?=gimptool-2.0
 COMMANDS=gribouillis
 CMD_PREFIX=cmd_
@@ -25,6 +25,9 @@ install: all
 
 $(eval $(foreach A,${COMMANDS},$(call compile,${A})))
 
+test: $(addprefix ${CMD_PREFIX},${COMMANDS})
+	./$(addprefix ${CMD_PREFIX},gribouillis) -o jeter.png
+
 clean:
-	rm -f ${SRCNAME} *.o $(addprefix ${SRCNAME},.tab.cpp .tab.hh)
+	rm -f *.o $(foreach A,${COMMANDS}, $(addprefix ${A},.tab.cpp .tab.hh) $(addprefix ${CMD_PREFIX},${A}) )
 	
