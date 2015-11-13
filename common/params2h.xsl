@@ -7,8 +7,8 @@
 
 <xsl:template match="/">
 
-#ifndef __<xsl:value-of select="$pluginname"/>_HEADER_
-#define __<xsl:value-of select="$pluginname"/>_HEADER_
+#ifndef __<xsl:value-of select="$plugintitle"/>_HEADER_
+#define __<xsl:value-of select="$plugintitle"/>_HEADER_
 /** BEGIN : AUTO GENERATED CODE **/
 
 
@@ -29,7 +29,7 @@
 
 
 /** structure holding preferences */
-typedef struct <xsl:value-of select="$pluginname"/>Vals_t
+typedef struct <xsl:value-of select="$pluginparam"/>
 	{
 	<xsl:apply-templates select="//param" mode="field"/>
 #ifdef STANDALONE
@@ -38,23 +38,23 @@ typedef struct <xsl:value-of select="$pluginname"/>Vals_t
 #else
 	gboolean preview;
 #endif
-	} <xsl:value-of select="$pluginname"/>Vals;
+	} <xsl:value-of select="$pluginparam"/>Vals;
 
 /** abstract plugin class */
-class <xsl:value-of select="$pluginname"/> : public <xsl:choose>
+class <xsl:value-of select="$abstractpluginname"/> : public <xsl:choose>
 		<xsl:when test="@extend"><xsl:value-of select="@extend"/></xsl:when>
-		<xsl:otherwise>AbstractCairoPlugin&lt;<xsl:value-of select="$pluginname"/>Vals&gt;</xsl:otherwise>
+		<xsl:otherwise>AbstractCairoPlugin&lt;<xsl:value-of select="$pluginparam"/>&gt;</xsl:otherwise>
 	</xsl:choose>
 	{
 	public:
-		static <xsl:value-of select="$pluginname"/>Vals PREFS;
-		<xsl:value-of select="$pluginname"/>()
+		static <xsl:value-of select="$pluginparam"/> PREFS;
+		<xsl:value-of select="$abstractpluginname"/>()
 			{
 			}
-		virtual ~<xsl:value-of select="$pluginname"/>()
+		virtual ~<xsl:value-of select="$abstractpluginname"/>()
 			{
 			}
-		virtual <xsl:value-of select="$pluginname"/>Vals* prefs();
+		virtual <xsl:value-of select="$pluginparam"/>* prefs();
 		virtual const char* name() const;
 		virtual void paint(XCairo* cairo,gint width,gint height)=0;
 		#ifndef STANDALONE

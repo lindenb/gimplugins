@@ -6,17 +6,17 @@
 
 using namespace std;
 
-class gribouillis:public abstract_gribouillis
+class Gribouillis:public AbstractGribouillis
 	{ 
 	public:
 		
-		gribouillis() {}
-		virtual ~gribouillis() {}
+		Gribouillis() {}
+		virtual ~Gribouillis() {}
 		virtual void  paint(XCairo* ctx,gint image_width,gint image_height);
 	};
 
 
-void gribouillis::paint(XCairo* ctx,gint image_width,gint image_height)
+void Gribouillis::paint(XCairo* ctx,gint image_width,gint image_height)
 {
 
   long occurences = (long)(((image_width)*(image_height))*prefs()->proba);
@@ -85,7 +85,7 @@ void gribouillis::paint(XCairo* ctx,gint image_width,gint image_height)
 #ifdef STANDALONE
 int main(int argc,char** argv)
 	{
-	gribouillis app;
+	Gribouillis app;
 	return app.main(argc,argv);
 	}
 #endif

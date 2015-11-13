@@ -2,8 +2,18 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
 <xsl:output method="text"/>
-<xsl:variable name="basepluginname" select="/plugin/@name"/>
-<xsl:variable name="pluginname" select="concat('abstract_',$basepluginname)"/>
+
+
+<xsl:variable name="pluginname" select="/plugin/@name"/>
+
+<xsl:variable name="plugintitle">
+<xsl:call-template name="titleize">
+  <xsl:with-param name="s" select="$pluginname"/>
+</xsl:call-template>
+</xsl:variable>
+
+<xsl:variable name="abstractpluginname" select="concat('Abstract',$plugintitle)"/>
+<xsl:variable name="pluginparam" select="concat($plugintitle,'Prefs')"/>
 
 <xsl:template match="*" mode="label">
 <xsl:choose>
@@ -35,5 +45,11 @@
 </xsl:text>
 </xsl:template>
 
+
+
+<xsl:template name="titleize">
+  <xsl:param name="s"/>
+  <xsl:value-of select="concat(translate(substring($s,1,1),'abcdefghijklmnopqrstuvwxyz','ABCDEFGHIJKLMNOPQRSTUVWXYZ'),substring($s,2))"/>
+</xsl:template>
 
 </xsl:stylesheet>

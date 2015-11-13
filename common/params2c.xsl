@@ -6,7 +6,7 @@
 <xsl:variable name="instanceclass">
 	<xsl:choose>
 		<xsl:when test="/plugin/@instanceclass"><xsl:value-of select="/plugin/@instanceclass"/></xsl:when>
-		<xsl:otherwise><xsl:value-of select="$basepluginname"/></xsl:otherwise>
+		<xsl:otherwise><xsl:value-of select="$plugintitle"/></xsl:otherwise>
 	</xsl:choose>
 </xsl:variable>
 
@@ -15,7 +15,7 @@
 #include &lt;unistd.h&gt;
 #include &lt;getopt.h&gt;
 #endif
-#include "<xsl:value-of select="$basepluginname"/>.hh"
+#include "<xsl:value-of select="$pluginname"/>.hh"
 
 <xsl:apply-templates select="plugin"/>
 
@@ -64,8 +64,9 @@ static void <xsl:value-of select="$pluginname"/>_run (
 #endif
 
 
-<xsl:value-of select="$pluginname"/>Vals
-<xsl:value-of select="$pluginname"/>::PREFS={
+<xsl:value-of select="$pluginparam"/>
+<xsl:text> </xsl:text>
+<xsl:value-of select="$abstractpluginname"/>::PREFS={
 <xsl:apply-templates select="//param" mode="instance"/>
 #ifdef STANDALONE
 1000, /* width */
@@ -77,7 +78,7 @@ static void <xsl:value-of select="$pluginname"/>_run (
 
 #ifdef STANDALONE
 
-void <xsl:value-of select="$pluginname"/>::usage(std::ostream&amp; out)
+void <xsl:value-of select="$abstractpluginname"/>::usage(std::ostream&amp; out)
 	{
 	out &lt;&lt; "Compilation: " &lt;&lt; __DATE__ &lt;&lt; __TIME__ &lt;&lt; std::endl;
 	out &lt;&lt; "Options: " &lt;&lt; std::endl;
@@ -92,7 +93,7 @@ void <xsl:value-of select="$pluginname"/>::usage(std::ostream&amp; out)
 	}
 
 
-int <xsl:value-of select="$pluginname"/>::main(int argc,char** argv)
+int <xsl:value-of select="$abstractpluginname"/>::main(int argc,char** argv)
 	{
 	char* save_as_filename = NULL;
            int c;
@@ -193,13 +194,13 @@ int <xsl:value-of select="$pluginname"/>::main(int argc,char** argv)
 #endif
 
 
-<xsl:value-of select="$pluginname"/>Vals* <xsl:value-of select="$pluginname"/>::prefs()
+<xsl:value-of select="$pluginparam"/>* <xsl:value-of select="$abstractpluginname"/>::prefs()
 	{
-	return &amp;(<xsl:value-of select="$pluginname"/>::PREFS);
+	return &amp;(<xsl:value-of select="$abstractpluginname"/>::PREFS);
 	}
 
 
-const char* <xsl:value-of select="$pluginname"/>::name() const
+const char* <xsl:value-of select="$abstractpluginname"/>::name() const
 	{
 	return "<xsl:value-of select="$pluginname"/>";
 	}
@@ -215,7 +216,7 @@ static void _preview_callback(GimpDrawable *drawable, GimpPreview  *preview)
 	instance.run(xdrawable,p);
 	}
 
-gboolean <xsl:value-of select="$pluginname"/>::dialog(XDrawable drawable	)
+gboolean <xsl:value-of select="$abstractpluginname"/>::dialog(XDrawable drawable	)
 	{
 	gimp_ui_init ("<xsl:value-of select="$pluginname"/>", FALSE);
 	GtkWidget* dialog = ::gimp_dialog_new (
@@ -489,7 +490,7 @@ gtk_widget_show(<xsl:value-of select="generate-id(.)"/>);
 		  	<xsl:value-of select="generate-id(.)"/>,
 		  	"toggled",
 			G_CALLBACK (gimp_toggle_button_update),
-			 &amp;(<xsl:value-of select="$pluginname"/>::PREFS.<xsl:value-of select="@name"/>)
+			 &amp;(<xsl:value-of select="$abstractpluginname"/>::PREFS.<xsl:value-of select="@name"/>)
 			 );
 		if(preview != NULL)
 			{
