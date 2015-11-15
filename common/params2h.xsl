@@ -64,12 +64,8 @@ class <xsl:value-of select="$abstractpluginname"/> : public <xsl:choose>
 	{
 	public:
 		static <xsl:value-of select="$pluginparam"/> PREFS;
-		<xsl:value-of select="$abstractpluginname"/>()
-			{
-			}
-		virtual ~<xsl:value-of select="$abstractpluginname"/>()
-			{
-			}
+		<xsl:value-of select="$abstractpluginname"/>();
+		virtual ~<xsl:value-of select="$abstractpluginname"/>();
 		virtual <xsl:value-of select="$pluginparam"/>* prefs();
 		virtual const char* name() const;
 		virtual void paint(XCairo* cairo,gint width,gint height)=0;

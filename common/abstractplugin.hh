@@ -3,6 +3,7 @@
 #include "common/xgimp.hh"
 #include "common/xcairo.hh"
 #include "common/random.hh"
+#include "common/normalize.hh"
 #ifdef STANDALONE
 #include <iostream>
 #endif

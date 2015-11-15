@@ -123,6 +123,16 @@ static void <xsl:value-of select="$pluginname"/>_run (
 <xsl:text> </xsl:text>
 <xsl:value-of select="$abstractpluginname"/>::PREFS;
 
+/** constructor */
+<xsl:value-of select="$abstractpluginname"/>::<xsl:value-of select="$abstractpluginname"/>()
+	{
+	}
+
+/** destructor */
+<xsl:value-of select="$abstractpluginname"/>::~<xsl:value-of select="$abstractpluginname"/>()
+	{
+	}
+
 #ifdef STANDALONE
 
 void <xsl:value-of select="$abstractpluginname"/>::usage(std::ostream&amp; out)

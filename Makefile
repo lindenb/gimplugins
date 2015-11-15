@@ -27,6 +27,7 @@ $(eval $(foreach A,${COMMANDS},$(call compile,${A})))
 
 test: $(addprefix ${CMD_PREFIX},${COMMANDS})
 	./$(addprefix ${CMD_PREFIX},gribouillis) -o jeter.png
+	./$(addprefix ${CMD_PREFIX},kirby01) --shape both -o kirby01a.png
 
 clean:
 	rm -f *.o $(foreach A,${COMMANDS}, $(addprefix ${A},.tab.cpp .tab.hh) $(addprefix ${CMD_PREFIX},${A}) )

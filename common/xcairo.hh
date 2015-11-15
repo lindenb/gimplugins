@@ -84,10 +84,33 @@ class XCairo
 			{
 			rgba(g,g,g,a);
 			}
+		void black()
+			{
+			gray(0);
+			}		
+		void black(double a)
+			{
+			gray(0,a);
+			}		
+		void white()
+			{
+			gray(1);
+			}
+		
+		void white(double a)
+			{
+			gray(1,a);
+			}
+
 		
 		void rectangle(double x,double y,double  w,double h)
 			{
 			::cairo_rectangle(cr,x,y,w,h);
+			}
+		
+		void cube(double cx,double cy,double r)
+			{
+			rectangle(cx-r,cy-r,r*2,r*2);
 			}
 
 		void line_width(double d)
