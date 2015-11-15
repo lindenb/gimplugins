@@ -1,0 +1,41 @@
+<plugin name="kirby01">
+	
+	<vbox>
+	<preview/>
+	<notebook>
+		<tab label="Bubbles">
+			<vbox>
+			<frame label="Propability">
+				<vbox>
+					<param name="proba" type="double" default="0.0001" label="Propability" min="0.0" max="1.0" step="0.0001"/>
+				</vbox>
+			</frame>
+			<frame label="Colors">
+				<vbox>
+					<param name="mingray" slider="true" type="double" default="0.01" label="Min. Gray" min="0.0" max="1.0" step="0.001"/>
+					<param name="maxgray" slider="true" type="double" default="1.0" label="Max. Gray" min="0.0" max="1.0" step="0.001"/>
+					<param name="minalpha" slider="true" type="double" default="0.0" label="Min. Alpha" min="0.0" max="1.0" step="0.001"/>
+					<param name="maxalpha" slider="true" type="double" default="1.0" label="Max. Alpha" min="0.0" max="1.0" step="0.001"/>
+				</vbox>
+			</frame>
+			<frame label="Sizes">
+				<vbox>
+					<param name="minradius" type="double" default="0.01" label="Min. Radius" min="0.0" max="100000" step="1"/>
+					<param name="maxradius" type="double" default="50" label="Max. Radius" min="0.0" max="100000" step="1"/>
+				</vbox>
+			</frame>
+			</vbox>
+		</tab>
+		<tab label="Misc">
+			<vbox>
+				<hbox>
+				<param name="orientation" type="select" label="Orientation">
+					<option value="vertical" default="true">Vertical</option>
+					<option value="horizontal">Horizontal</option>
+				</param>
+				</hbox>
+			</vbox>
+		</tab>
+	</notebook>
+	</vbox>
+</plugin>

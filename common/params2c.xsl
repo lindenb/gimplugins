@@ -24,6 +24,50 @@
 <xsl:template match="plugin">
 
 
+<xsl:for-each select="//param[@type='select']">
+
+/** <xsl:apply-templates select="." mode="description"/> */
+<xsl:apply-templates select="." mode="enum.name"/><xsl:text> </xsl:text><xsl:apply-templates select="." mode="enum.name"/>IndexFromString(const char* s) {
+	<xsl:for-each select="option">
+	<xsl:if test="position()&gt;1">else </xsl:if> if(s!=NULL &amp;&amp; strcmp(s,"<xsl:value-of select="@value"/>")==0)
+		{
+		return <xsl:apply-templates select="." mode="enum.item"/> ;
+		}
+	</xsl:for-each>
+	else
+		{
+		#ifdef STANDALONE
+		cerr &lt;&lt; "Bad value for enum <xsl:value-of select="@name"/>" &lt;&lt; (s==NULL?"(NULL)":s) &lt;&lt; "available are: " &lt;&lt; endl;
+		<xsl:for-each select="option">
+		cerr &lt;&lt; "\t+ <xsl:value-of select="@value"/>" &lt;&lt; endl;
+		</xsl:for-each>
+		
+		exit(EXIT_FAILURE);
+		#else
+		return <xsl:apply-templates select="option[@default='true']" mode="enum.item"/>;
+		#endif
+		}
+	};
+
+#ifndef STANDALONE
+static void cb_<xsl:value-of select="generate-id(.)"/>changed( GtkComboBox *combo, gpointer data)
+{
+	
+	<xsl:value-of select="$abstractpluginname"/>* me = (<xsl:value-of select="$abstractpluginname"/>*)data;
+    /* Obtain currently selected string from combo box */
+    gchar *s = gtk_combo_box_get_active_text( combo );
+ 
+
+ 	me->prefs()-><xsl:value-of select="@name"/> = <xsl:apply-templates select="." mode="enum.name"/>IndexFromString(s);
+
+    /* Free string */
+    g_free( s );
+}
+#endif
+
+</xsl:for-each>
+
+
 #ifndef STANDALONE
 
 static void <xsl:value-of select="$pluginname"/>_query (void) {
@@ -125,6 +169,19 @@ int <xsl:value-of select="$abstractpluginname"/>::main(int argc,char** argv)
                		if( strcmp("<xsl:value-of select="@name"/>" , long_options[option_index].name ) == 0)
                			{
                			<xsl:choose>
+               			<xsl:when test="@type='select'">
+               			<xsl:for-each select="option">
+               			<xsl:if test="position()&gt;1">else </xsl:if> if(strcmp(optarg,"<xsl:value-of select="@value"/>")==0)
+               				{
+               				prefs()-><xsl:value-of select="../@name"/> = <xsl:apply-templates select="." mode="enum.item"/> ;
+               				}
+               			</xsl:for-each>
+               			else
+               				{
+               				cerr &lt;&lt; "Bad value for enum <xsl:value-of select="@name"/>" &lt;&lt; endl;
+                   			return EXIT_FAILURE;
+               				}
+               			</xsl:when>
                    		<xsl:when test="@type='bool'">
                    		prefs()-><xsl:value-of select="@name"/> = !<xsl:value-of select="@default"/>;
                    		</xsl:when>
@@ -514,9 +571,69 @@ gtk_widget_show(<xsl:value-of select="generate-id(.)"/>);
 			"<xsl:apply-templates select="." mode="description"/>",
 			NULL);		
 		
-
 </xsl:template>
 
+<xsl:template match="param[@type='select']">
+/* BEGIN SELECT <xsl:value-of select="@name"/> */
+		/* container for <xsl:value-of select="@name"/> */
+		GtkWidget* <xsl:value-of select="generate-id(.)"/> = gtk_hbox_new (FALSE, 0);
+		gtk_widget_show (<xsl:value-of select="generate-id(.)"/>);
+		
+		/* label for <xsl:value-of select="@name"/> */
+		GtkWidget* <xsl:value-of select="concat('lbl',generate-id(.))"/> = gtk_label_new("<xsl:apply-templates select="." mode="label"/>");
+        ::gtk_widget_show (<xsl:value-of select="concat('lbl',generate-id(.))"/> );
+        ::gtk_box_pack_start (GTK_BOX (<xsl:value-of select="generate-id(.)"/>), <xsl:value-of select="concat('lbl',generate-id(.))"/> , FALSE, FALSE, 6);
+        ::gtk_label_set_justify (GTK_LABEL (<xsl:value-of select="concat('lbl',generate-id(.))"/> ), GTK_JUSTIFY_RIGHT);
+
+		/* tooltip for <xsl:value-of select="@name"/> */
+		GtkTooltips* <xsl:value-of select="concat('tooltip',generate-id(.))"/> = gtk_tooltips_new ();
+		gtk_tooltips_set_tip(
+			<xsl:value-of select="concat('tooltip',generate-id(.))"/>,
+			<xsl:value-of select="concat('lbl',generate-id(.))"/>,
+			"<xsl:apply-templates select="." mode="description"/>",
+			NULL);
+			
+        
+
+        
+        
+        GtkListStore* <xsl:value-of select="concat('list',generate-id(.))"/> = gtk_list_store_new(1, G_TYPE_STRING);
+        GtkTreeIter <xsl:value-of select="concat('iter',generate-id(.))"/>;
+		<xsl:for-each select="option">
+		gtk_list_store_append(<xsl:value-of select="concat('list',generate-id(..))"/>, &amp;<xsl:value-of select="concat('iter',generate-id(..))"/>);
+    	gtk_list_store_set(<xsl:value-of select="concat('list',generate-id(..))"/>, &amp;<xsl:value-of select="concat('iter',generate-id(..))"/>, 0, "<xsl:value-of select="@value"/>", -1);
+       	</xsl:for-each>
+       	
+       	 /* combo for <xsl:value-of select="@name"/> */
+        GtkWidget* <xsl:value-of select="concat('combo',generate-id(.))"/> = ::gtk_combo_box_new_with_model (GTK_TREE_MODEL(<xsl:value-of select="concat('list',generate-id(.))"/>));
+        ::gtk_combo_box_set_active(GTK_COMBO_BOX(<xsl:value-of select="concat('combo',generate-id(.))"/>), 0);
+        ::gtk_widget_show (<xsl:value-of select="concat('combo',generate-id(.))"/>);
+        ::gtk_box_pack_start (GTK_BOX (<xsl:value-of select="generate-id(.)"/>), <xsl:value-of select="concat('combo',generate-id(.))"/>, FALSE, FALSE, 6);
+        
+        
+        GtkCellRenderer *<xsl:value-of select="concat('render',generate-id(.))"/> = gtk_cell_renderer_text_new();
+   		::gtk_cell_layout_pack_start(GTK_CELL_LAYOUT(<xsl:value-of select="concat('combo',generate-id(.))"/>), <xsl:value-of select="concat('render',generate-id(.))"/>, TRUE);
+    	::gtk_cell_layout_set_attributes(GTK_CELL_LAYOUT(<xsl:value-of select="concat('combo',generate-id(.))"/>),<xsl:value-of select="concat('render',generate-id(.))"/>, "text", 0, NULL);
+        
+        ::g_signal_connect(
+        	  G_OBJECT( <xsl:value-of select="concat('combo',generate-id(.))"/> ),
+        	  "changed",
+              G_CALLBACK( cb_<xsl:value-of select="generate-id(.)"/>changed),
+              this
+              );
+        if(preview != NULL)
+			{
+			::g_signal_connect_swapped (
+			  	 <xsl:value-of select="concat('combo',generate-id(.))"/>,
+			  	"changed",
+				 G_CALLBACK (gimp_preview_invalidate),
+				 preview
+				 );
+			}
+       
+        
+/* END SELECT <xsl:value-of select="@name"/> */
+</xsl:template>
 
 <xsl:template match="label">
   /* create label */
@@ -607,6 +724,12 @@ GtkWidget* <xsl:value-of select="concat('lbl',$notebookid)"/> = NULL;
 	<xsl:when test="(@type='double' or @type='gdouble')">0.0</xsl:when>
 	<xsl:when test="(@type='float' or @type='gfloat') and @default">(gfloat)<xsl:value-of select="@default"/></xsl:when>
 	<xsl:when test="(@type='float' or @type='gfloat')">(gfloat)0.0</xsl:when>
+	<xsl:when test="(@type='select')">
+	<xsl:if test="not(option[@default='true'])">
+		<xsl:message terminate="yes">param:instance not default for '<xsl:value-of select="@name"/></xsl:message>
+	</xsl:if>
+			<xsl:apply-templates select="option[@default='true']" mode="enum.item"/>
+	</xsl:when>
 	<xsl:otherwise><xsl:message terminate="yes">param:instance boum '<xsl:value-of select="@type"/>/<xsl:value-of select="@name"/>'</xsl:message></xsl:otherwise>
 </xsl:choose>
 <xsl:text>;

@@ -37,7 +37,8 @@
 		<xsl:when test="@type='bool' or @type='boolean'">gboolean</xsl:when>
 		<xsl:when test="@type='double' or @type='gdouble'">gdouble</xsl:when>
 		<xsl:when test="@type='float' or @type='gfloat'">gfloat</xsl:when>
-		<xsl:otherwise><xsl:value-of select="@type"/></xsl:otherwise>
+		<xsl:when test="@type='select'"><xsl:apply-templates select="." mode="enum.name"/></xsl:when>
+		<xsl:otherwise terminate="yes">param:field <xsl:value-of select="@type"/></xsl:otherwise>
 	</xsl:choose>
 <xsl:text>	</xsl:text>
 <xsl:value-of select="@name"/>
@@ -45,6 +46,14 @@
 </xsl:text>
 </xsl:template>
 
+
+<xsl:template match="param[@type='select']" mode="enum.name">
+<xsl:value-of select="concat('E_',@name)"/>
+</xsl:template>
+
+<xsl:template match="option" mode="enum.item">
+<xsl:value-of select="concat('E_',../@name,'_',@value)"/>
+</xsl:template>
 
 
 <xsl:template name="titleize">

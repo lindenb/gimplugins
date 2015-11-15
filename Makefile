@@ -1,6 +1,6 @@
 .PHONY:all clean install test
 GIMPTOOL?=gimptool-2.0
-COMMANDS=gribouillis
+COMMANDS=gribouillis kirby01
 CMD_PREFIX=cmd_
 CFLAGS=-I..
 COMMDIR=./common/

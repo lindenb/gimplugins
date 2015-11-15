@@ -23,3 +23,5 @@
 *.hex
 *~
 src/hello/hello
+*.tab.hh
+*.tab.cpp

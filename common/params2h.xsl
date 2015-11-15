@@ -27,6 +27,21 @@
 
 <xsl:template match="plugin">
 
+<xsl:for-each select="//param[@type='select']">
+
+/** <xsl:apply-templates select="." mode="description"/> */
+enum <xsl:apply-templates select="." mode="enum.name"/> {
+	<xsl:for-each select="option">
+		<xsl:if test="position()&gt;1">,</xsl:if>
+		<xsl:apply-templates select="." mode="enum.item"/> /* <xsl:value-of select="text()"/> */
+	</xsl:for-each>
+	};
+
+<xsl:apply-templates select="." mode="enum.name"/><xsl:text> </xsl:text><xsl:apply-templates select="." mode="enum.name"/>IndexFromString(const char* s);
+
+</xsl:for-each>
+
+
 /** structure <xsl:value-of select="$pluginparam"/> holding preferences */
 class <xsl:value-of select="$pluginparam"/>
 	{
