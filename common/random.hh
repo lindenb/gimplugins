@@ -38,4 +38,6 @@ class Random : public AbstractRandom
 		virtual bool boolean() {  return (::rand_r(&_seed)%2==0);}
 	};
 
+
+
 #endif

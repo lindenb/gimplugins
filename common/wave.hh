@@ -3,8 +3,9 @@
 
 #include <cmath>
 #include <vector>
+#include "common/random.hh"
 
-class Wave
+class Wave : public AbstractRandom 
 	{
 	private:
 		struct Circle
@@ -16,7 +17,7 @@ class Wave
 		std::vector<Circle> circles;
 		double  maxr;
 	public:
-		Wave(double r,double radspeed):maxr(r)
+		Wave(double r,double radspeed):AbstractRandom(),maxr(r)
 			{
 			Circle c;
 			c.r=(r<0?-r:r);
@@ -34,7 +35,10 @@ class Wave
 			circles.push_back(c);
 			return *this;
 			}
-		double rnd()
+		
+		/** https://twitter.com/klmr/status/667005762565181440 */
+		using AbstractRandom::rnd ;
+		virtual double rnd()
 			{
 			double cx=0;
 			double cy=0;
@@ -48,14 +52,6 @@ class Wave
 				cy = cy + sin(c.angle)*c.r;
 				}
 			return (maxr-cx)/(2.0*maxr);
-			}
-		double rnd(double v)
-			{
-			return rnd()*v;
-			}
-		double rnd(double m,double M)
-			{
-			return m + rnd(M-m);
 			}
 	};
 

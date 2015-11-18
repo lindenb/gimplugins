@@ -1,6 +1,6 @@
 .PHONY:all clean install test
 GIMPTOOL?=gimptool-2.0
-COMMANDS=gribouillis kirby01 gribouille01
+COMMANDS=gribouillis kirby01 gribouille01 hatching01
 CMD_PREFIX=cmd_
 CFLAGS=-I..
 COMMDIR=./common/
@@ -34,6 +34,8 @@ test_kirby01:
 	./$(addprefix ${CMD_PREFIX},kirby01) --shape both -o kirby01a.png
 test_gribouille01:
 	./$(addprefix ${CMD_PREFIX},gribouille01) -o gribouille01a.png
+test_hatching01:
+	./$(addprefix ${CMD_PREFIX},hatching01) -o hatching01.png
 
 clean:
 	rm -f *.o $(foreach A,${COMMANDS}, $(addprefix ${A},.tab.cpp .tab.hh) $(addprefix ${CMD_PREFIX},${A}) )
