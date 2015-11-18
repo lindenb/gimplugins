@@ -1,0 +1,43 @@
+<plugin name="gribouille01">
+	
+	<vbox>
+	<preview/>
+	<notebook>
+		<tab label="Params">
+			<vbox>
+			<frame label="Propability">
+				<vbox>
+					<param name="proba" type="double" default="0.01" label="Propability" min="0.0" max="1.0" step="0.0001"/>
+				</vbox>
+			</frame>
+			<frame label="Radius">
+				<vbox>
+					<param name="minradius" type="double" default="0.5" label="Min. Radius" min="0.01" max="1000.0" step="0.001"/>
+					<param name="maxradius" type="double" default="50.0" label="Max. Radius" min="0.01" max="1000.0" step="0.001"/>
+				</vbox>
+			</frame>
+			<frame label="Alpha">
+				<vbox>
+					<param name="minalpha" type="double" default="0.0" label="Min. Alpha" min="0.01" max="1.0" step="0.001"/>
+					<param name="maxalpha" type="double" default="1.0" label="Max. Alpha" min="0.01" max="1.0" step="0.001"/>
+				</vbox>
+			</frame>
+			<frame label="Shapes">
+				<param name="shape" type="select" label="Shape">
+					<option value="circle" default="true">Circle</option>
+					<option value="square">Square</option>
+					<option value="both">Both</option>
+				</param>
+			</frame>
+			<frame label="Stroke">
+				<param name="style" type="select" label="Style">
+					<option value="fill" default="true">Fill</option>
+					<option value="stroke">Stroke</option>
+				</param>
+			</frame>
+			<param name="otherside" type="bool" default="false" label="Paint Both sides"/>
+			</vbox>
+		</tab>
+	</notebook>
+	</vbox>
+</plugin>
