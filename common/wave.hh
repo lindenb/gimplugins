@@ -1,10 +1,10 @@
-#ifndef FREQUENCY_HH
-#define FREQUENCY_HH
+#ifndef WAVE_HH
+#define WAVE_HH
 
 #include <cmath>
 #include <vector>
 
-class Frequency
+class Wave
 	{
 	private:
 		struct Circle
@@ -16,19 +16,19 @@ class Frequency
 		std::vector<Circle> circles;
 		double  maxr;
 	public:
-		Frequency(double r,double radspeed):maxr(r)
+		Wave(double r,double radspeed):maxr(r)
 			{
 			Circle c;
-			c.r=r;
+			c.r=(r<0?-r:r);
 			c.angle=0;
 			c.radspeed=radspeed;
 			circles.push_back(c);
 			}
-		Frequency& add(double r,double radspeed)
+		Wave& add(double r,double radspeed)
 			{
 			maxr+=r;
 			Circle c;
-			c.r=r;
+			c.r=(r<0?-r:r);
 			c.angle=0;
 			c.radspeed=radspeed;
 			circles.push_back(c);
@@ -48,6 +48,14 @@ class Frequency
 				cy = cy + sin(c.angle)*c.r;
 				}
 			return (maxr-cx)/(2.0*maxr);
+			}
+		double rnd(double v)
+			{
+			return rnd()*v;
+			}
+		double rnd(double m,double M)
+			{
+			return m + rnd(M-m);
 			}
 	};
 
