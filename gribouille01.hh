@@ -38,7 +38,6 @@ void Gribouille01::paint(XCairo* ctx,gint image_width,gint image_height)
 		x0 = x1;
 		y0 = y1;
 		
-
 		
 		if(coords.size()==6)
 			{
