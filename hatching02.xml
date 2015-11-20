@@ -1,4 +1,4 @@
-<plugin name="hatching01">
+<plugin name="hatching02">
 	
 	<vbox>
 	<preview/>
@@ -9,6 +9,10 @@
 				<vbox>
 					<param name="proba" type="double" default="0.05" label="Propability" min="0.0" max="1.0" step="0.0001"/>
 				</vbox>
+			</frame>
+			<frame label="Square">
+				<param name="quare_size"  type="double" default="100" label="Propability" min="0.0" max="10000" step="0.0001"/>
+				<param name="incertitude" type="double" default="100" label="Incertitude" min="0" max="10" step="0.0001"/>
 			</frame>
 			<frame label="Length">
 				<vbox>

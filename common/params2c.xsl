@@ -144,6 +144,7 @@ void <xsl:value-of select="$abstractpluginname"/>::usage(std::ostream&amp; out)
 	out &lt;&lt; "  -W|--width (int) image width" &lt;&lt; std::endl;
 	out &lt;&lt; "  -H|--height (int) image height" &lt;&lt; std::endl;	
 	out &lt;&lt; "  -o|--output (filename) output file. REQUIRED" &lt;&lt; std::endl;	
+	out &lt;&lt; "  -b|--bckg white background" &lt;&lt; std::endl;	
 	<xsl:for-each select="//param">
     out &lt;&lt; "  --<xsl:value-of select="@name"/>" &lt;&lt; std::endl;	
     </xsl:for-each>
@@ -155,7 +156,7 @@ int <xsl:value-of select="$abstractpluginname"/>::main(int argc,char** argv)
 	{
 	char* save_as_filename = NULL;
            int c;
-
+		   bool white_background = false;
            while (1) {
                //int this_option_optind = optind ? optind : 1;
                int option_index = 0;
@@ -163,6 +164,7 @@ int <xsl:value-of select="$abstractpluginname"/>::main(int argc,char** argv)
                	   {"help",     no_argument, 0,  'h' },
                	   {"version",     no_argument, 0,  'v' },
                    {"width",     required_argument, 0,  'W' },
+                   {"bckg",     no_argument, 0,  'b' },
                    {"height",     required_argument, 0,  'H' },
                    {"output",     required_argument, 0,  'o' }<xsl:for-each select="//param">,
                    {"<xsl:value-of select="@name"/>",<xsl:choose>
@@ -171,7 +173,7 @@ int <xsl:value-of select="$abstractpluginname"/>::main(int argc,char** argv)
                    	</xsl:choose>,0,0}</xsl:for-each>,
                    {0,         0,                 0,  0 }
                		};
-               c = getopt_long(argc, argv, "W:H:o:vh", long_options, &amp;option_index);
+               c = getopt_long(argc, argv, "W:H:o:vhb", long_options, &amp;option_index);
                if (c == -1) break;
                switch (c) {
                case 0:
@@ -242,6 +244,9 @@ int <xsl:value-of select="$abstractpluginname"/>::main(int argc,char** argv)
                     std::cout &lt;&lt; "VERSION" &lt;&lt; std::endl;
                     return EXIT_SUCCESS;
                		break;
+               case 'b':
+               		white_background =true;
+               		break;
                case 'h':
                     usage(std::cout);
                     return EXIT_SUCCESS;
@@ -255,6 +260,12 @@ int <xsl:value-of select="$abstractpluginname"/>::main(int argc,char** argv)
 		}
 	
 	XCairo xcairo(prefs()->image_width,prefs()->image_height);
+	if( white_background )
+		{
+		xcairo.white();
+		xcairo.rectangle(0,0,prefs()->image_width,prefs()->image_height);
+		xcairo.fill();
+		}
 	paint(&amp;xcairo,prefs()->image_width,prefs()->image_height);
 	xcairo.png(save_as_filename);
 	return EXIT_SUCCESS;

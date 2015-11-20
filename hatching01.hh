@@ -1,24 +1,28 @@
 #include <vector>
 #include "hatching01.tab.hh"
-#include "common/range.hh"
 #include "common/wiggle.hh"
 #include "common/trigonometry.hh"
 
 using namespace std;
 
-class Hatching01:public AbstractHatching01
+
+#define CLASSNAME Hatching01
+
+class CLASSNAME:public AbstractHatching01
 	{ 
 	public:
 		
-		Hatching01() {}
-		virtual ~Hatching01() {}
+		CLASSNAME() {}
+		virtual ~CLASSNAME() {}
 		virtual void  paint(XCairo* ctx,gint image_width,gint image_height);
 	};
 
 
-void Hatching01::paint(XCairo* ctx,gint image_width,gint image_height)
+void CLASSNAME::paint(XCairo* ctx,gint image_width,gint image_height)
 	{
-	Wiggle wiggle(&rand);
+	WiggleLine wiggle(&rand);
+	MinMax alpha(prefs()->minalpha, prefs()->maxalpha);
+	MinMax lwidth(prefs()->minlinewidth, prefs()->maxlinewidth);
 	int dx=5;
 	for(int side=0;side<2;++side)
 		{
@@ -28,28 +32,41 @@ void Hatching01::paint(XCairo* ctx,gint image_width,gint image_height)
 			std::vector<double> pts;
 			if( side==0)
 				{
-				wiggle.drawWiggle(pts,p0,0,p0,image_height);
+				wiggle.line(pts,p0,0,p0,image_height);
 				}
 			else
 				{
-				wiggle.drawWiggle(pts,0,p0,image_width,p0);
+				wiggle.line(pts,0,p0,image_width,p0);
 				}
 			
-			ctx->line_width(rand.rnd(prefs()->minlinewidth, prefs()->maxlinewidth));
-			for(unsigned int i=0;i+1 < pts.size();i+=2)
+			ctx->line_width(lwidth.rnd(&rand));
+			ctx->black(alpha.rnd(&rand));
+			
+			unsigned int i=0;
+			while(i+1 < pts.size())
 				{
 				if(i==0)
 					{
 					ctx->move_to(pts[i],pts[i+1]);
+					i+=2;
+					}
+				else if(i+5< pts.size())
+					{
+					ctx->curve_to(
+						pts[i+0],pts[i+1],
+						pts[i+2],pts[i+3],
+						pts[i+4],pts[i+5]
+						);
+					
+					i+=6;
 					}
 				else
 					{
 					ctx->line_to(pts[i],pts[i+1]);
-					ctx->black(rand.rnd(prefs()->minalpha, prefs()->maxalpha));
-					ctx->stroke();
-					ctx->move_to(pts[i],pts[i+1]);
+					i+=2;
 					}
 				}
+			ctx->stroke();
 			
 			p0 += ( 1 + rand.rnd(dx)) ;
 			}
@@ -60,7 +77,7 @@ void Hatching01::paint(XCairo* ctx,gint image_width,gint image_height)
 #ifdef STANDALONE
 int main(int argc,char** argv)
 	{
-	Hatching01 app;
+	CLASSNAME app;
 	return app.main(argc,argv);
 	}
 #endif
