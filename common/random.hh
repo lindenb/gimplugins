@@ -29,7 +29,8 @@ class Random : public AbstractRandom
 		virtual ~Random() {}
 		virtual void reset(unsigned int seed) {this->_seed=seed;}
 		virtual unsigned int seed() { return _seed;}
-		
+		/** https://twitter.com/klmr/status/667005762565181440 */
+		using AbstractRandom::nextInt ;
 		virtual int nextInt(int i) { return ::rand_r(&_seed)%i;}
 		
 		/** https://twitter.com/klmr/status/667005762565181440 */

@@ -1,6 +1,5 @@
 #include <vector>
 #include "gribouillis.tab.hh"
-#include "common/range.hh"
 #include "common/wiggle.hh"
 #include "common/trigonometry.hh"
 

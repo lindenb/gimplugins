@@ -1,0 +1,32 @@
+<plugin name="hatching03">
+	
+	<vbox>
+	<preview/>
+	<notebook>
+		<tab label="Params">
+			<vbox>
+			<frame label="Propability">
+				<vbox>
+					<param name="proba" type="double" default="0.05" label="Propability" min="0.0" max="1.0" step="0.0001"/>
+				</vbox>
+			</frame>
+			<minmax label="Distance between strokes" type="double" name="diststroke" value="1" min="0" max="50"/>
+			<minmax label="Gray" type="double" name="gray" value="1.0" min="0.0" max="1.0"/>			
+			
+			<frame label="Square">
+				<param name="quare_size"  type="double" default="100" label="Propability" min="0.0" max="10000" step="0.0001"/>
+				<param name="incertitude" type="double" default="100" label="Incertitude" min="0" max="10" step="0.0001"/>
+			</frame>
+			<frame label="Length">
+				<vbox>
+					<param name="minlen" type="double" default="80.0" label="Min. Length" min="0.01" max="5000.0"/>
+					<param name="maxlen" type="double" default="100.0" label="Max. Length" min="0.01" max="5000.0"/>
+				</vbox>
+			</frame>
+			<frame id='alpha'/>
+			<frame id='line-width'/>
+			</vbox>
+		</tab>
+	</notebook>
+	</vbox>
+</plugin>

@@ -1,6 +1,6 @@
 .PHONY:all clean install test
 GIMPTOOL?=gimptool-2.0
-COMMANDS=gribouillis kirby01 gribouille01 hatching01 hatching02
+COMMANDS=gribouillis kirby01 gribouille01 $(addprefix hatching,01 02 03 04)
 CMD_PREFIX=cmd_
 CFLAGS=-I..
 COMMDIR=./common/

@@ -45,6 +45,10 @@ struct MinMax
 		 {
 		 return lerp(rand->rnd());
 		 }
+	double operator()(double v)
+		{
+		return lerp(v);
+		}
 	};
 
 #endif
