@@ -216,6 +216,27 @@ int <xsl:value-of select="$abstractpluginname"/>::main(int argc,char** argv)
                    		</xsl:if>
                    		prefs()-><xsl:value-of select="@name"/> = d;
                    		</xsl:when>
+                   		
+                   		<xsl:when test="@type='int'">
+                   		
+                   		int d = atoi(optarg); 
+                   		<xsl:if test="@min">
+                   		if(d &lt; <xsl:value-of select="@min"/>)
+                   			{
+                   			cerr &lt;&lt; "<xsl:value-of select="@name"/> should be &gt;=  <xsl:value-of select="@min"/> " &lt;&lt; endl;
+                   			return EXIT_FAILURE;
+                   			}
+                   		</xsl:if>
+                   		<xsl:if test="@max">
+                   		if(d &gt; <xsl:value-of select="@max"/>)
+                   			{
+                   			cerr &lt;&lt; "<xsl:value-of select="@name"/> should be &lt;=  <xsl:value-of select="@max"/> " &lt;&lt; endl;
+                   			return EXIT_FAILURE;
+                   			}
+                   		</xsl:if>
+                   		prefs()-><xsl:value-of select="@name"/> = d;
+                   		</xsl:when>
+                   		
                    		<xsl:otherwise><xsl:message terminate="yes">getopt:<xsl:value-of select="@type"/></xsl:message></xsl:otherwise>
                    		</xsl:choose>
                			}

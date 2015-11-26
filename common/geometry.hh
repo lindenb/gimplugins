@@ -18,6 +18,14 @@ struct Point
 	T y;
 	Point():x(0),y(0){}
 	Point(T x,T y):x(x),y(y){}
+	double distance(T x2,T y2) const
+		{
+		return std::sqrt(std::pow(x2-x,2)+std::pow(y2-y,2));
+		}
+	double distance(const Point<T>& o) const
+		{
+		return distance(o.x,o.y);
+		}
 	};
 	
 typedef Point<double> PointD;
