@@ -22,12 +22,12 @@ class CLASSNAME:public AbstractHatching03
 
 void CLASSNAME::paint(XCairo* ctx,gint image_width,gint image_height)
 	{
+	DimensionD area(image_width,image_height);
 	PointD center(
 		prefs()->centerx * image_width,
 		prefs()->centery * image_height
 		);
-		cerr << center.x << " " << center.y << endl;
-		cerr << prefs()->centerx << " " << prefs()->centery << endl;
+	
 	Wiggle wiggle(&rand);
 	map<Radian,double>* rad2radius=0;
 	map<Radian,double>* next_rad2radius=0;
@@ -60,6 +60,7 @@ void CLASSNAME::paint(XCairo* ctx,gint image_width,gint image_height)
 	
 	for(;;)
 		{
+		bool something_printed=false;
 		++iteration;
 		next_rad2radius = new map<Radian,double>;
 		
@@ -83,7 +84,7 @@ void CLASSNAME::paint(XCairo* ctx,gint image_width,gint image_height)
 					{
 					if( r->first() > angle()+rad_between_strokes) break;
 					a_radius+=r->second;
-				++m;
+				    ++m;
 					++r;
 					}
 				a_radius/=m;
@@ -116,6 +117,10 @@ void CLASSNAME::paint(XCairo* ctx,gint image_width,gint image_height)
 			
 			if(iteration>1)
 				{
+				if(area.contains(ax,ay) || area.contains(bx,by))
+					{
+					something_printed=true;
+					}
 				vector<double> pts;
 				wiggle.drawWiggle(pts,ax,  ay,  bx,  by);
 				MinMax r(1.0,0.5);
@@ -131,11 +136,15 @@ void CLASSNAME::paint(XCairo* ctx,gint image_width,gint image_height)
 					else
 						{
 						ctx->line_to(pts[i],pts[i+1]);
-						ctx->line_width(stroke_width(iteration/(double)max_iterations)*lw(i/(double)(pts.size()/2)));
+						ctx->line_width(stroke_width(iteration/(double)max_iterations));//*lw(i/(double)(pts.size()/2)));
 						ctx->stroke();
 						ctx->move_to(pts[i],pts[i+1]);
 						}
 					}
+				}
+			else
+				{
+				something_printed=true;
 				}
 			angle += rad_between_strokes;
 			angle = modulo_pi2(angle());
@@ -144,10 +153,12 @@ void CLASSNAME::paint(XCairo* ctx,gint image_width,gint image_height)
 		rad2radius = next_rad2radius;
 		
 		
-		if(radius>image_width) break;
+		if(!something_printed) break;
+		if(radius > std::max(image_width,image_height)) break;
 		
 		radius+=max(2.0,distance_between_circles(iteration/(double)max_iterations));
 		prev_radius=radius;
+		cerr << radius << endl;
 		}
 	
 	if(rad2radius!=0) delete rad2radius;

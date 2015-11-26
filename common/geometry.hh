@@ -1,15 +1,6 @@
 #ifndef MYGEOMETRY_HH
 #define MYGEOMETRY_HH
-
-
-template<typename T>
-struct Dimension
-	{
-	T width;
-	T height;
-	Dimension():width(0),height(0){}
-	Dimension(T width,T height):width(width),height(height){}
-	};
+#include <iostream>
 
 template<typename T>
 struct Point
@@ -27,8 +18,46 @@ struct Point
 		return distance(o.x,o.y);
 		}
 	};
-	
+
+
+template<typename T>
+std::ostream& operator << (std::ostream&  os,const Point<T> &o)
+{
+os << "Point(" << o.x << "," << o.y << ")" ;
+return os;
+} 
+
 typedef Point<double> PointD;
+
+
+template<typename T>
+struct Dimension
+	{
+	T width;
+	T height;
+	Dimension():width(0),height(0){}
+	Dimension(T width,T height):width(width),height(height){}
+	bool contains(T ax,T ay) const
+		{
+		if(ax > width ) return false;
+		if(ay > height ) return false;
+		return true;
+		}
+	bool contains(const Point<T>& pt) const
+		{
+		return contains(pt.x,pt.y);
+		}
+	};
+
+typedef Dimension<double> DimensionD;
+
+template<typename T>
+std::ostream& operator << (std::ostream&  os,const Dimension<T>& o)
+{
+os << "Dim(" << o.width << "," << o.height << ")" ;
+return os;
+}
+
 
 template<typename T>
 struct Rect
@@ -39,6 +68,8 @@ struct Rect
 	T height;
 	T centerX() const { return (T)(x+width/2.0); }
 	T centerY() const { return (T)(y+height/2.0); }
+	T maxX() const { return x+width;}
+	T maxY() const { return y+height;}
 	Point<T> center() const
 		{
 		Point<T> c(centerX(),centerY());
@@ -49,8 +80,28 @@ struct Rect
 		Dimension<T> d(width,height);
 		return d;
 		}
+	bool contains(T ax,T ay) const
+		{
+		if(ax < x ) return false;
+		if(ay < y ) return false;
+		if(ax > maxX() ) return false;
+		if(ay > maxY() ) return false;
+		return true;
+		}
+	bool contains(const Point<T>& pt) const
+		{
+		return contains(pt.x,pt.y);
+		}
 	};
 
+typedef Rect<double> RectD;
+
+template<typename T>
+std::ostream& operator << (std::ostream&  os,const Rect<T>& o)
+{
+os << "Rect(" << o.x << "," << o.y << "," << o.width <<"," << o.height << ")" ;
+return os;
+} 
 
 
 #endif

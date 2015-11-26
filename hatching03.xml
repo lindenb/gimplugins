@@ -16,8 +16,8 @@
 			
 			<minmax label="Distance between strokes" type="double" name="diststroke" value="1" min="0" max="50"/>
 			<minmax label="Gray" type="double" name="gray" value="1.0" min="0.0" max="1.0"/>
-			<minmax label="Stroke Size" type="double" name="strokesize" value="1.0" min="0.01" max="5.0"/>			
-			<minmax label="Stroke Width" type="double" name="strokewidth" value="1.0" min="0.01" max="5.0"/>			
+			<minmax label="Stroke Size" type="double" name="strokesize" value="1.0" min="20.0" max="25.0"/>			
+			<minmax label="Stroke Width" type="double" name="strokewidth" value="1.0" min="0.5" max="5.0"/>			
 			<minmax label="Distance between circles" type="double" name="distcircle" value="0.1" min="0" max="50"/>
 			
 			<frame id='alpha'/>
