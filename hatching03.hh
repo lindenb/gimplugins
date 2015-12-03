@@ -71,7 +71,7 @@ void CLASSNAME::paint(XCairo* ctx,gint image_width,gint image_height)
 		Radian angle(PI2 * rand.rnd());
 		int n_strokes = (int)(PI2/rad_between_strokes); 
 		int sens=1;
-		//cerr << "iter:"<< iteration << " "<<n_strokes << " r=" << radius << " p=" << perimeter << " r2=" << rad_between_strokes << endl;
+
 		for(int n=0; n< n_strokes; ++n)
 			{
 			double a_radius = prev_radius+rand.nextInt(-user_precision,user_precision);
